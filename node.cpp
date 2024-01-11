@@ -19,7 +19,7 @@ public:
     MessageBox* messageBox;
 
     Node() {
-        tempMessageReceived.set(128);
+        tempMessagesReceived.set(128);
         random_device rd;
         gen = mt19937_64(rd());
     }
@@ -30,13 +30,13 @@ public:
 
     void refresh() {
         // remove message from messageList
-        
+
         // put message in messageReceived
         while (!tempMessagesReceived.empty()) {
             int messageReceived = tempMessagesReceived.pop();
             messageList.insert(messageReceived);
         }
-        tempMessageReceived.clear();
+        tempMessagesReceived.clear();
 
         // set all to be 0
 
@@ -50,7 +50,7 @@ public:
     
     void recieve(int messageId) {
         numOfMessagesReceived++;
-        tempMessageReceived.push(messageId);
+        tempMessagesReceived.push(messageId);
         messageBox->addCount(messageId);
     }
 
