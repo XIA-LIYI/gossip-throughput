@@ -1,3 +1,4 @@
+#pragma once
 #include<set>
 #include<atomic>
 #include "utils/threadsafelist.cpp"
@@ -6,10 +7,13 @@ using namespace std;
 
 class MessageBox {
 public:
-    atomic<int>  numOfNewMessage {};
+    atomic<int> numOfNewMessage {};
     atomic<int> messageId {};
+    atomic<int> messagesCount[10000] {};
+    ThreadSafeList messagesAllReceived;
+
     MessageBox() {
-        
+        messagesAllReceived.set(128);
     }
 
     int generateNewMessage() {
@@ -24,4 +28,13 @@ public:
     void clearRestriction() {
         numOfNewMessage = 0;
     }
+
+    void addCount(int messageId) {
+        messagesCount[messageId]++;
+        if (messagesCount[messageId] == numOfNodes) {
+            messagesAllReceived.push(messageId);
+        }
+    }
+
+
 };

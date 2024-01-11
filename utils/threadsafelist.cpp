@@ -35,7 +35,7 @@ public:
         return false;
     }
 
-    int remove() {
+    int pop() {
         int pos = tail--;
         numOfRemoved++;
         return lst[pos - 1];
