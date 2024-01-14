@@ -15,6 +15,7 @@ public:
     list<pair<int, int> > messageForSend;
     mt19937_64 gen;
     atomic<int> numOfMessagesReceived {};
+    atomic<int> numOfMessagesSent {};
     int numOfMessagesValid = 0;
     int numOfMessagesRemoved = 0;
 
@@ -45,23 +46,23 @@ public:
 
     }
 
-    void removeMessageWithFullCount(list<int> lst) {
-        // for (int i = 0; i < messageBox->messagesWithFullCount.tail; i++) {
-        //     auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
-        //     numOfMessagesRemoved += x;
-        //     if (x == 0) {
-        //         cout << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
-        //     }
-        // }
-
-        // TODO: test
-        for (auto message: lst) {
-            auto x = messageList.erase(message);
+    void removeMessageWithFullCount() {
+        for (int i = 0; i < messageBox->messagesWithFullCount.tail; i++) {
+            auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
             numOfMessagesRemoved += x;
             if (x == 0) {
-                cout << messageBox->messagesCount[message] << endl;
+                cout << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
             }
         }
+
+        // TODO: test
+        // for (auto message: lst) {
+        //     auto x = messageList.erase(message);
+        //     numOfMessagesRemoved += x;
+        //     if (x == 0) {
+        //         cout << messageBox->messagesCount[message] << endl;
+        //     }
+        // }
 
     }
 
@@ -92,6 +93,7 @@ public:
             // send
             isOk = true;
             nodes[receiver].recieve(front.first);
+            numOfMessagesSent++;
             front.second++;
             if (front.second == bandwidth) {
                 break;
@@ -114,6 +116,7 @@ public:
         messageList.insert(newMessageId);
         numOfMessagesValid++;
         nodes[receiver].recieve(newMessageId);
+        numOfMessagesSent++;
     }
 
     void send(Node nodes[]) {

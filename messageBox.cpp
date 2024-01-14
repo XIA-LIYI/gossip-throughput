@@ -11,11 +11,12 @@ public:
     atomic<int> numOfNewMessage {};
     atomic<int> messageId {};
     atomic<int> messagesCount[numOfMessagesTotal] {};
-    list<int> messagesWithFullCount;
+    // list<int> messagesWithFullCount;
+    ThreadSafeList messagesWithFullCount;
     atomic<int> numOfMessageRemoved {};
 
     MessageBox() {
-        // messagesWithFullCount.set(128);
+        messagesWithFullCount.set(128);
     }
 
     int generateNewMessage() {
@@ -42,7 +43,7 @@ public:
     void addCount(int messageId) {
         messagesCount[messageId]++;
         if (messagesCount[messageId] == numOfNodes) {
-            messagesWithFullCount.push_back(messageId);
+            messagesWithFullCount.push(messageId);
             numOfMessageRemoved++;
         }
     }

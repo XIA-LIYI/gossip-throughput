@@ -7,13 +7,28 @@ using namespace std;
 
 Barrier sync(numOfThreads);
 
-void validate(Node &node) {
+void validateSingleNode(Node &node) {
     // 1. size of message list + number of removed = number of valid
     if (node.messageList.size() + node.messageBox->numOfMessageRemoved != node.numOfMessagesValid) {
         cout << node.messageList.size() << " " << node.messageBox->numOfMessageRemoved << " " << node.numOfMessagesValid;
         throw runtime_error("Fail condition 1");
     }
-    // 2.
+    // 2. total received 
+}
+
+void validateAll(Node nodes[], int round) {
+    int totalReceived = 0;
+    for (int i = 0; i < numOfNodes; i++) {
+        totalReceived += nodes[i].numOfMessagesReceived;
+    }
+    int totalSent = 0;
+    for (int i = 0; i < numOfNodes; i++) {
+        totalSent += nodes[i].numOfMessagesSent;
+    }
+    cout << totalSent << " " << totalReceived << endl;
+    if (totalReceived > round * bandwidth * numOfNodes) {
+        throw runtime_error("Fail condition 2");
+    }
 }
 
 void calculateThroughput(Node nodes[]) {
@@ -31,7 +46,7 @@ void calculateThroughput(Node nodes[]) {
 }
 
 void work(int threadId, Node nodes[], MessageBox& messageBox) {
-    for (int i = 0; i < totalRounds; i++) {
+    for (int i = 1; i <= totalRounds; i++) {
         for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
             // send
             nodes[j].send(nodes);
@@ -41,21 +56,21 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
             nodes[j].refresh();
         }
         sync.wait();
-        list<int> lst = messageBox.messagesWithFullCount;
+        // list<int> lst = messageBox.messagesWithFullCount;
         for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].removeMessageWithFullCount(lst);
+            nodes[j].removeMessageWithFullCount();
         }
         sync.wait();
 
         if (i % 10 == 0) {
             for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
-                if (nodes[j].messageList.size() + messageBox.numOfMessageRemoved != nodes[j].numOfMessagesValid) {
-                    cout << nodes[j].messageList.size() << " " << nodes[j].messageBox->numOfMessageRemoved << " " << nodes[j].numOfMessagesValid << endl;
-                    // throw runtime_error("Fail condition 1");
-                }
+                validateSingleNode(nodes[j]);
             }
             sync.wait();
             if (threadId == 0) {
+                cout << "Round " << i << " finishes." << endl;
+                validateAll(nodes, i);
+
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
