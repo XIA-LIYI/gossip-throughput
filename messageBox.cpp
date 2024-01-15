@@ -10,7 +10,7 @@ class MessageBox {
 public:
     atomic<int> numOfNewMessage {};
     atomic<int> messageId {};
-    atomic<int> messagesCount[numOfMessagesTotal] {};
+    atomic<int> messagesCount[numOfMessagesTotal] = {};
     // list<int> messagesWithFullCount;
     ThreadSafeList messagesWithFullCount;
     atomic<int> numOfMessageRemoved {};
@@ -20,7 +20,7 @@ public:
     }
 
     int generateNewMessage() {
-        if (messageId >= 10000) {
+        if (messageId >= numOfMessagesTotal) {
             return -1;
         }
         numOfNewMessage++;
@@ -42,6 +42,7 @@ public:
 
     void addCount(int messageId) {
         messagesCount[messageId]++;
+
         if (messagesCount[messageId] == numOfNodes) {
             messagesWithFullCount.push(messageId);
             numOfMessageRemoved++;

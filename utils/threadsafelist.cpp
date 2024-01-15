@@ -6,7 +6,7 @@ using namespace std;
 
 class ThreadSafeList {
 public:
-    atomic<int> tail {};
+    atomic<int> tail = {};
     int* lst;
     int maxSize;
     int numOfRemoved;

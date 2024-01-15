@@ -36,6 +36,7 @@ public:
         while (!tempMessagesReceived.empty()) {
             int messageReceived = tempMessagesReceived.pop();
             auto res = messageList.insert(messageReceived);
+            if (messageReceived )
             if (res.second == true) {
                 numOfMessagesValid++;
                 messageBox->addCount(messageReceived);
@@ -43,6 +44,12 @@ public:
             }
         }
         tempMessagesReceived.clear();
+        cout << "Node " << id << " has " << numOfMessagesValid << " messages and has " << messageForSend.size() << " messages for send" << endl;
+        cout << "Node " << id << " has " << endl;
+        for (auto x: messageList) {
+            cout << x << " ";
+        }
+        cout << endl;
 
     }
 
@@ -75,53 +82,71 @@ public:
         tempMessagesReceived.push(messageId);
     }
 
-    void findAndSend(Node nodes[]) {
-        int receiver = gen() % numOfNodes;
+    void sendTo(int receiver, Node nodes[]) {
+        cout << "Node " << id << " wants to send to " << receiver << " " << messageForSend.size() << endl;
         int size = messageForSend.size();
         list<pair<int, int> > temp;
         bool isOk = false;
         for (int i = 0; i < size; i++) {
+
             auto front = messageForSend.front();
             messageForSend.pop_front();
+            front.second++;
             if (nodes[receiver].checkDuplicate(front.first)) {
-                temp.push_back(front);
+                if (front.second < bandwidth) {
+                    temp.push_back(front);
+                }
+                cout << "fail 1" << endl;
                 continue;
             }
             if (messageBox->messagesCount[front.first] >= numOfNodes) {
+                if (front.second < bandwidth) {
+                    temp.push_back(front);
+                }
+                cout << "fail 2" << endl;
                 continue;
             }
             // send
             isOk = true;
             nodes[receiver].recieve(front.first);
+            cout << "Node " << id << " sends to " << receiver << " with message " << front.first << " " << front.second << endl;
             numOfMessagesSent++;
-            front.second++;
-            if (front.second == bandwidth) {
-                break;
+            if (front.second < bandwidth) {
+                temp.push_back(front);
             }
-            temp.push_back(front);
             break;
         }
+        temp.splice(temp.end(), messageForSend);
+        messageForSend = temp;
         if (isOk) {
-            temp.splice(temp.end(), messageForSend);
-            messageForSend = temp;
             return;
         }
         int newMessageId = messageBox->generateNewMessage();
         if (newMessageId == -1) {
             return;
         }
-        // cout << "Node " << id << " generates " << newMessageId << endl;
-        // cout << "Node " << id << " sends to " << receiver << " with message " << newMessageId << endl;
+        cout << "Node " << id << " generates " << newMessageId << endl;
+        cout << "Node " << id << " sends to " << receiver << " with message " << newMessageId << endl;
+
         messageForSend.push_back(make_pair(newMessageId, 1));
-        messageList.insert(newMessageId);
+        messageList.insert(newMessageId);        
         numOfMessagesValid++;
-        nodes[receiver].recieve(newMessageId);
-        numOfMessagesSent++;
+        if (receiver == id) {
+            nodes[receiver].recieve(newMessageId);
+            numOfMessagesSent++;
+        }
+
     }
 
     void send(Node nodes[]) {
-        for (int i = 0; i < bandwidth; i++) {
-            findAndSend(nodes);
+        set<int> receivers;
+        while (receivers.size() < bandwidth) {
+            int receiver = gen() % numOfNodes;
+            receivers.insert(receiver);
         }
+        for (auto receiver: receivers) {
+            sendTo(receiver, nodes);
+        }
+
     }
 };

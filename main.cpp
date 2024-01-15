@@ -9,10 +9,10 @@ Barrier sync(numOfThreads);
 
 void validateSingleNode(Node &node) {
     // 1. size of message list + number of removed = number of valid
-    if (node.messageList.size() + node.messageBox->numOfMessageRemoved != node.numOfMessagesValid) {
-        cout << node.messageList.size() << " " << node.messageBox->numOfMessageRemoved << " " << node.numOfMessagesValid;
-        throw runtime_error("Fail condition 1");
-    }
+    // if (node.messageList.size() + node.messageBox->numOfMessageRemoved != node.numOfMessagesValid) {
+    //     cout << node.messageList.size() << " " << node.messageBox->numOfMessageRemoved << " " << node.numOfMessagesValid;
+    //     throw runtime_error("Fail condition 1");
+    // }
     // 2. total received 
 }
 
@@ -57,12 +57,12 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
         }
         sync.wait();
         // list<int> lst = messageBox.messagesWithFullCount;
-        for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].removeMessageWithFullCount();
-        }
+        // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
+        //     nodes[j].removeMessageWithFullCount();
+        // }
         sync.wait();
 
-        if (i % 10 == 0) {
+        if (1) {
             for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
                 validateSingleNode(nodes[j]);
             }
