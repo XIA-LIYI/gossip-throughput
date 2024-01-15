@@ -6,10 +6,11 @@ using namespace std;
 
 class ThreadSafeList {
 public:
-    atomic<int> tail = {};
+    atomic<int> size = {};
     int* lst;
     int maxSize;
-    int numOfRemoved;
+    int numOfRemoved = 0;
+
 
     ThreadSafeList() {
     }
@@ -20,7 +21,7 @@ public:
     }
 
     void push(int element) {
-        int currentTail = tail++;
+        int currentTail = size++;
         if (currentTail < maxSize) {
             lst[currentTail] = element;
         } else {
@@ -29,20 +30,20 @@ public:
     }
 
     bool empty() {
-        if (numOfRemoved >= tail) {
+        if (size == 0) {
             return true;
         }
         return false;
     }
 
     int pop() {
-        int pos = tail--;
+        int pos = size--;
         numOfRemoved++;
         return lst[pos - 1];
     }
 
     void clear() {
-        tail = 0;
+        size = 0;
         numOfRemoved = 0;
     }
 };

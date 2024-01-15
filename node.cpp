@@ -36,13 +36,15 @@ public:
         while (!tempMessagesReceived.empty()) {
             int messageReceived = tempMessagesReceived.pop();
             auto res = messageList.insert(messageReceived);
-            if (messageReceived )
+            cout << "Node " << id << " receive ";
+            cout << messageReceived << " ";
             if (res.second == true) {
                 numOfMessagesValid++;
                 messageBox->addCount(messageReceived);
                 messageForSend.push_back(make_pair(messageReceived, 0));
             }
         }
+        cout << endl;
         tempMessagesReceived.clear();
         cout << "Node " << id << " has " << numOfMessagesValid << " messages and has " << messageForSend.size() << " messages for send" << endl;
         cout << "Node " << id << " has " << endl;
@@ -54,7 +56,7 @@ public:
     }
 
     void removeMessageWithFullCount() {
-        for (int i = 0; i < messageBox->messagesWithFullCount.tail; i++) {
+        for (int i = 0; i < messageBox->messagesWithFullCount.size; i++) {
             auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
             numOfMessagesRemoved += x;
             if (x == 0) {
@@ -78,17 +80,16 @@ public:
     }
     
     void recieve(int messageId) {
+        cout << "Node " << id << " receives " << messageId << endl;
         numOfMessagesReceived++;
         tempMessagesReceived.push(messageId);
     }
 
     void sendTo(int receiver, Node nodes[]) {
-        cout << "Node " << id << " wants to send to " << receiver << " " << messageForSend.size() << endl;
         int size = messageForSend.size();
         list<pair<int, int> > temp;
         bool isOk = false;
         for (int i = 0; i < size; i++) {
-
             auto front = messageForSend.front();
             messageForSend.pop_front();
             front.second++;
@@ -108,8 +109,9 @@ public:
             }
             // send
             isOk = true;
-            nodes[receiver].recieve(front.first);
+            
             cout << "Node " << id << " sends to " << receiver << " with message " << front.first << " " << front.second << endl;
+            nodes[receiver].recieve(front.first);
             numOfMessagesSent++;
             if (front.second < bandwidth) {
                 temp.push_back(front);
