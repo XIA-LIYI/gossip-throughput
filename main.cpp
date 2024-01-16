@@ -56,13 +56,13 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
             nodes[j].refresh();
         }
         sync.wait();
-        // list<int> lst = messageBox.messagesWithFullCount;
-        // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
-        //     nodes[j].removeMessageWithFullCount();
-        // }
+
+        for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
+            nodes[j].removeMessageWithFullCount();
+        }
         sync.wait();
 
-        if (1) {
+        if (i % 10 == 0) {
             for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
                 validateSingleNode(nodes[j]);
             }
@@ -101,6 +101,19 @@ int main() {
 
     for (int i = 0; i < numOfThreads; i++) {
         threads[i].join();
+    }
+    for (int i = 0; i < numOfMessagesTotal; i++) {
+        int count = messageBox.messagesCount[i];
+        if (count != numOfNodes) {
+            cout << "messageId: " << i << " count: " << count << endl;
+            int checkCount = 0;
+            for (int j = 0; j < numOfNodes; j++) {
+                if (nodes[j].messageList.find(i) != nodes[j].messageList.end()) {
+                    checkCount++;
+                }
+            }
+            cout << checkCount << endl;
+        }
     }
     auto end = chrono::steady_clock::now();
     auto usedTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
