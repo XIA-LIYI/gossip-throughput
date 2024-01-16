@@ -31,33 +31,33 @@ void validateAll(Node nodes[], int round) {
     }
 }
 
-void calculateThroughput(Node nodes[]) {
+void calculateThroughput(Node nodes[], int totalSent) {
     float sumOfThroughput = 0.0;
     float minThroughput = 1.0;
     float maxThroughput = 0.0;
-    for (int i = 0; i < numOfNodes; i++) {
-        float throughput = (float) nodes[i].numOfMessagesValid / (float) nodes[i].numOfMessagesReceived;
+    for (int i = numOfDeadNodes; i < numOfNodes; i++) {
+        float throughput = (float) nodes[i].numOfMessagesValid / (float) totalSent;
         minThroughput = min(throughput, minThroughput);
         maxThroughput = max(throughput, maxThroughput);
         sumOfThroughput += throughput;
     }
-    float averageThrougput = sumOfThroughput / (float) numOfNodes;
+    float averageThrougput = sumOfThroughput / (float) (numOfNodes - numOfDeadNodes);
     cout << "max: " << maxThroughput << " min: " << minThroughput << " average: " << averageThrougput << endl;
 }
 
 void work(int threadId, Node nodes[], MessageBox& messageBox) {
     for (int i = 1; i <= totalRounds; i++) {
-        for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
             // send
             nodes[j].send(nodes);
         }
         sync.wait();
-        for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
             nodes[j].refresh();
         }
         sync.wait();
 
-        for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
             nodes[j].removeMessageWithFullCount();
         }
         sync.wait();
@@ -74,7 +74,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
-                calculateThroughput(nodes);
+                calculateThroughput(nodes, i * bandwidth);
                 cout << endl;
             }
         }
@@ -88,8 +88,11 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
 int main() {
     MessageBox messageBox;
     Node* nodes = new Node[numOfNodes];
-    for (int i = 0; i < numOfNodes; i++) {
-        nodes[i].initialize(i, &messageBox);
+    for (int i = 0; i < numOfDeadNodes; i++) {
+        nodes[i].initialize(i, &messageBox, true);
+    }
+    for (int i = numOfDeadNodes; i < numOfNodes; i++) {
+        nodes[i].initialize(i, &messageBox, false);    
     }
 
     int range = numOfNodes / numOfThreads;

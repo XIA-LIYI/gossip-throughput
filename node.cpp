@@ -19,6 +19,9 @@ public:
     int numOfMessagesValid = 0;
     int numOfMessagesRemoved = 0;
 
+    // for attack
+    bool isDead = false;
+
     MessageBox* messageBox;
 
     Node() {
@@ -27,9 +30,10 @@ public:
         gen = mt19937_64(rd());
     }
 
-    void initialize(int nodeId, MessageBox* box) {
+    void initialize(int nodeId, MessageBox* box, bool dead) {
         messageBox = box;
         id = nodeId;
+        isDead = dead;
     }
 
     void refresh() {
@@ -79,11 +83,17 @@ public:
     }
 
     bool checkDuplicate(int messageId) {
+        if (isDead) {
+            return false;
+        }
         return messageList.find(messageId) != messageList.end();
     }
     
     void recieve(int messageId) {
         // cout << "Node " << id << " receives " << messageId << endl;
+        if (isDead) {
+            return;
+        }
         numOfMessagesReceived++;
         tempMessagesReceived.push(messageId);
     }
@@ -210,6 +220,7 @@ public:
             int receiver = gen() % numOfNodes;
             receivers.insert(receiver);
         }
+        // two task
         for (auto receiver: receivers) {
             sendTo(receiver, nodes);
         }
