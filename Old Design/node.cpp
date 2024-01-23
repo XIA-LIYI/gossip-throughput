@@ -4,7 +4,6 @@
 #include<list>
 #include "parameters.cpp"
 #include "utils/threadsafelist.cpp"
-#include "utils/messagelist.cpp"
 #include "messageBox.cpp"
 using namespace std;
 
@@ -14,7 +13,6 @@ public:
     set<int> messageList;    
     ThreadSafeList tempMessagesReceived;
     list<pair<int, int> > messageForSend;
-    queue<int> messageQueues[numOfNodes];
     mt19937_64 gen;
     atomic<int> numOfMessagesReceived {};
     atomic<int> numOfMessagesSent {};

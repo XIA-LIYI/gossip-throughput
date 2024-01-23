@@ -1,0 +1,2 @@
+1. every message is pushed into queue when messageReceived
+2. every node is selected randomly and pop all of the message it has, if no such, find from message list or generate a new message
