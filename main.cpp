@@ -48,11 +48,6 @@ void calculateThroughput(Node nodes[], int totalSent) {
 void work(int threadId, Node nodes[], MessageBox& messageBox) {
     for (int i = 1; i <= totalRounds; i++) {
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            // send
-            nodes[j].cleanQueue(nodes);
-        }
-        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            // send
             nodes[j].send(nodes);
         }
         sync.wait();
@@ -60,26 +55,25 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
             nodes[j].refresh();
         }
         sync.wait();
+        // for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
+        //     nodes[j].removeMessageWithFullCount();
+        // }
+        // sync.wait();
 
-        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].removeMessageWithFullCount();
-        }
-        sync.wait();
-
-        if (i % 10 == 0) {
-            for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
-                validateSingleNode(nodes[j]);
-            }
-            sync.wait();
+        if (i % 5 == 0) {
+            // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
+            //     validateSingleNode(nodes[j]);
+            // }
+            // sync.wait();
             if (threadId == 0) {
                 cout << "Round " << i << " finishes." << endl;
-                validateAll(nodes, i);
+                // validateAll(nodes, i);
 
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
-                cout << "queue length is " << nodes[0].messageForSend.size() << endl;
-                cout << "message list length is " << nodes[0].messageList.size() << endl;
+                // cout << "queue length is " << nodes[0].messa << endl;
+                // cout << "message list length is " << nodes[0].messageList.size() << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 cout << endl;
             }
@@ -111,19 +105,19 @@ int main() {
     for (int i = 0; i < numOfThreads; i++) {
         threads[i].join();
     }
-    for (int i = 0; i < numOfMessagesTotal; i++) {
-        int count = messageBox.messagesCount[i];
-        if (count != numOfNodes) {
-            cout << "messageId: " << i << " count: " << count << endl;
-            int checkCount = 0;
-            for (int j = 0; j < numOfNodes; j++) {
-                if (nodes[j].messageList.find(i) != nodes[j].messageList.end()) {
-                    checkCount++;
-                }
-            }
-            cout << checkCount << endl;
-        }
-    }
+    // for (int i = 0; i < numOfMessagesTotal; i++) {
+    //     int count = messageBox.messagesCount[i];
+    //     if (count != numOfNodes) {
+    //         cout << "messageId: " << i << " count: " << count << endl;
+    //         int checkCount = 0;
+    //         for (int j = 0; j < numOfNodes; j++) {
+    //             if (nodes[j].messageList.find(i) != nodes[j].messageList.end()) {
+    //                 checkCount++;
+    //             }
+    //         }
+    //         cout << checkCount << endl;
+    //     }
+    // }
     auto end = chrono::steady_clock::now();
     auto usedTime = chrono::duration_cast<chrono::milliseconds>(end - start).count();
     float parsedTime = ((float)usedTime) / 1000;

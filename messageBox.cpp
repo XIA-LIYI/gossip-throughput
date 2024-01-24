@@ -16,7 +16,7 @@ public:
     atomic<int> numOfMessageRemoved {};
 
     MessageBox() {
-        messagesWithFullCount.set(256);
+        messagesWithFullCount.set(1024);
     }
 
     int generateNewMessage() {
