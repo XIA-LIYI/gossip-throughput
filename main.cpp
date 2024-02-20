@@ -163,6 +163,7 @@ int main() {
     float parsedTime = ((float)usedTime) / 1000;
     cout << "It takes " << parsedTime << " seconds for " << totalRounds << " rounds" << endl;
     cout << "It takes " << parsedTime / totalRounds * 100 << " seconds for 100 rounds" << endl;
-    // calculateThroughput(nodes, totalRounds * bandwidth);
+    cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
+    cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
     calculateGossipLatency(messageBox);
 }
