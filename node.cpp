@@ -19,7 +19,8 @@ public:
     atomic<int> numOfMessagesReceived {};
     atomic<int> numOfMessagesSent {};
     int numOfMessagesValid = 0;
-    int numOfMessagesRemoved = 0;
+    int currMessagesValid = 0;
+    // int numOfMessagesRemoved = 0;
 
     // for attack
     bool isDead = false;
@@ -40,7 +41,7 @@ public:
         tempMessagesReceived.set(256);
     }
 
-    void refresh() {
+    void refresh(int round) {
         numOfMessagesSent = 0;
 
         while (!tempMessagesReceived.empty()) {
@@ -50,9 +51,9 @@ public:
             // cout << messageReceived << " ";
             if (res == true) {
                 numOfMessagesValid++;
-                messageBox->addCount(messageReceived);
+                currMessagesValid++;
+                messageBox->addCount(messageReceived, round);
 
-                // new
                 set<int> nextReceivers;
                 while (nextReceivers.size() < gossipRate) {
                     int nextReceiver = gen() % numOfNodes;
@@ -109,11 +110,11 @@ public:
         if (isDead) {
             return;
         }
-        numOfMessagesReceived++;
+        // numOfMessagesReceived++;
         tempMessagesReceived.push(messageId);
     }
 
-    void sendTo(int receiver, Node nodes[]) {
+    void sendTo(int receiver, Node nodes[], int round) {
         // cout << "Node " << id << " wants to send to " << receiver << endl;
         // TODO: see the queue length
         while (!messageQueues[receiver].empty()) {
@@ -133,7 +134,7 @@ public:
         // }
 
         // Second trial: generate a new message to send
-        int newMessageId = messageBox->generateNewMessage();
+        int newMessageId = messageBox->generateNewMessage(round);
         if (newMessageId == -1) {
             return;
         }
@@ -149,14 +150,14 @@ public:
     }
 
 
-    void send(Node nodes[]) {
+    void send(Node nodes[], int round) {
         set<int> receivers;
         while (receivers.size() < bandwidth) {
             int receiver = gen() % numOfNodes;
             receivers.insert(receiver);
         }
         for (auto receiver: receivers) {
-            sendTo(receiver, nodes);
+            sendTo(receiver, nodes, round);
         }
     }
 };

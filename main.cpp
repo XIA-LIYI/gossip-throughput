@@ -42,17 +42,57 @@ void calculateThroughput(Node nodes[], int totalSent) {
         sumOfThroughput += throughput;
     }
     float averageThrougput = sumOfThroughput / (float) (numOfNodes - numOfDeadNodes);
-    cout << "max: " << maxThroughput << " min: " << minThroughput << " average: " << averageThrougput << endl;
+    cout << "total throughput max: " << maxThroughput << " min: " << minThroughput << " average: " << averageThrougput << endl;
+}
+
+void calculateInstantaneousThroughput(Node nodes[], int totalSent) {
+    float sumOfThroughput = 0.0;
+    float minThroughput = 1.0;
+    float maxThroughput = 0.0;
+    for (int i = numOfDeadNodes; i < numOfNodes; i++) {
+        float throughput = (float) nodes[i].currMessagesValid / (float) totalSent;
+        minThroughput = min(throughput, minThroughput);
+        maxThroughput = max(throughput, maxThroughput);
+        sumOfThroughput += throughput;
+        nodes[i].currMessagesValid = 0;
+    }
+    float averageThrougput = sumOfThroughput / (float) (numOfNodes - numOfDeadNodes);
+    cout << "instantaneous throughput max: " << maxThroughput << " min: " << minThroughput << " average: " << averageThrougput << endl;
+}
+
+void calculateGossipLatency(MessageBox& messageBox) {
+    // if (messageBox.messageId < 10000) {
+    //     return;
+    // }
+    int count = 0;
+    int sumOfLatency = 0;
+    int maxLatency = 0;
+    int minLatency = 9999;
+    for (int i = 0; i < 10000; i++) {
+        int id = rand() % messageBox.messageId;
+        if (messageBox.nintyfiveRound[id] > 0) {
+            int latency = messageBox.nintyfiveRound[id] - messageBox.startRound[id];
+            if (latency > maxLatency) {
+                maxLatency = latency;
+            }
+            if (latency < minLatency) {
+                minLatency = latency;
+            }
+            sumOfLatency += latency;
+        }
+    }
+    int averageLatency = sumOfLatency / 10000;
+    cout << "max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
 }
 
 void work(int threadId, Node nodes[], MessageBox& messageBox) {
     for (int i = 1; i <= totalRounds; i++) {
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].send(nodes);
+            nodes[j].send(nodes, i);
         }
         sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].refresh();
+            nodes[j].refresh(i);
         }
         sync.wait();
         // for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
@@ -75,12 +115,12 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
                 // cout << "queue length is " << nodes[0].messa << endl;
                 // cout << "message list length is " << nodes[0].messageList.size() << endl;
                 calculateThroughput(nodes, i * bandwidth);
+                calculateInstantaneousThroughput(nodes, 5 * bandwidth);
                 cout << endl;
             }
         }
         messageBox.refresh();
         sync.wait();
-
     }
 
 }
@@ -123,4 +163,6 @@ int main() {
     float parsedTime = ((float)usedTime) / 1000;
     cout << "It takes " << parsedTime << " seconds for " << totalRounds << " rounds" << endl;
     cout << "It takes " << parsedTime / totalRounds * 100 << " seconds for 100 rounds" << endl;
+    // calculateThroughput(nodes, totalRounds * bandwidth);
+    calculateGossipLatency(messageBox);
 }
