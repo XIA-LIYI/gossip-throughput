@@ -54,7 +54,7 @@ public:
 
                 // new
                 set<int> nextReceivers;
-                while (nextReceivers.size() < 32) {
+                while (nextReceivers.size() < gossipRate) {
                     int nextReceiver = gen() % numOfNodes;
                     nextReceivers.insert(nextReceiver);
                 }
@@ -115,6 +115,7 @@ public:
 
     void sendTo(int receiver, Node nodes[]) {
         // cout << "Node " << id << " wants to send to " << receiver << endl;
+        // TODO: see the queue length
         while (!messageQueues[receiver].empty()) {
             auto messageId = messageQueues[receiver].front();
             if (nodes[receiver].checkDuplicate(messageId)) {
@@ -139,7 +140,7 @@ public:
         // cout << "Node " << id << " generates " << newMessageId << endl;
         // cout << "Node " << id << " sends to " << receiver << " with message " << newMessageId << endl;
         
-        TODO: see any other implementation method
+        // TODO: see any other implementation method
         // messageList.insert(newMessageId);        
         // numOfMessagesValid++;
         nodes[receiver].receive(newMessageId);

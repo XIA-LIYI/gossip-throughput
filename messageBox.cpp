@@ -43,7 +43,7 @@ public:
     void addCount(int messageId) {
         messagesCount[messageId]++;
 
-        if (messagesCount[messageId] == numOfNodes) {
+        if (messagesCount[messageId] == numOfNodes - numOfDeadNodes) {
             messagesWithFullCount.push(messageId);
             numOfMessageRemoved++;
         }
