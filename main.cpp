@@ -104,7 +104,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
         // }
         // sync.wait();
 
-        if (i % 1 == 0) {
+        if (i % logFrequency == 0) {
             // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
             //     validateSingleNode(nodes[j]);
             // }
@@ -119,7 +119,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
                 // cout << "queue length is " << nodes[0].messa << endl;
                 // cout << "message list length is " << nodes[0].messageList.size() << endl;
                 calculateThroughput(nodes, i * bandwidth);
-                calculateInstantaneousThroughput(nodes, 5 * bandwidth);
+                calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
             }
         }
