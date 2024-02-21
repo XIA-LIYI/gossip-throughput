@@ -129,9 +129,9 @@ public:
         while (k < size) {
             k++;
             auto messageId = messageQueues[receiver].front();
+            messageQueues[receiver].pop();
             if (nodes[receiver].checkDuplicate(messageId)) {
                 // duplicate
-                messageQueues[receiver].pop();
                 continue;
             }
             if (isSend == true) {
