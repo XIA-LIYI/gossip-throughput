@@ -19,7 +19,7 @@ public:
     int nintyfiveRound[numOfMessagesTotal] = {};
 
     MessageBox() {
-        messagesWithFullCount.set(10000);
+        messagesWithFullCount.set(bandwidth);
     }
 
     int generateNewMessage(int round) {
