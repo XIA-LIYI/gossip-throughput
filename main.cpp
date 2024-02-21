@@ -86,7 +86,6 @@ void calculateGossipLatency(MessageBox& messageBox) {
 }
 
 void work(int threadId, Node nodes[], MessageBox& messageBox) {
-    cout << "start" << endl;
     for (int i = 1; i <= totalRounds; i++) {
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
             nodes[j].send(nodes, i);
