@@ -174,7 +174,6 @@ public:
             int receiver = gen() % numOfNodes;
             receivers.insert(receiver);
         }
-        cout << id << " is ok " << endl;
         for (auto receiver: receivers) {
             sendTo(receiver, nodes, round);
         }
