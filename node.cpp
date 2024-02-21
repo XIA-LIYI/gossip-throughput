@@ -167,6 +167,7 @@ public:
 
 
     void send(Node nodes[], int round) {
+        cout << id << " is sedning \n";
         set<int> receivers;
         while (receivers.size() < bandwidth) {
             int receiver = gen() % numOfNodes;
