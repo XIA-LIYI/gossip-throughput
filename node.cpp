@@ -38,7 +38,7 @@ public:
     }
 
     void initialize(int nodeId, MessageBox* box, bool dead) {
-        cout << id << " ";
+        cout << nodeId << " ";
         messageBox = box;
         id = nodeId;
         isDead = dead;
