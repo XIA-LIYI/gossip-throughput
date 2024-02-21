@@ -86,7 +86,6 @@ void calculateGossipLatency(MessageBox& messageBox) {
 }
 
 void work(int threadId, Node nodes[], MessageBox& messageBox) {
-    cout << "threadId" << endl;
     for (int i = 1; i <= totalRounds; i++) {
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
             nodes[j].send(nodes, i);
@@ -131,11 +130,8 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
 }
 
 int main() {
-    cout << "start" << endl;
     MessageBox messageBox;
-    cout << "2" << endl;
     Node* nodes = new Node[numOfNodes];
-    cout << "3" << endl;
     for (int i = 0; i < numOfDeadNodes; i++) {
         nodes[i].initialize(i, &messageBox, true);
     }
@@ -146,7 +142,7 @@ int main() {
     int range = numOfNodes / numOfThreads;
     thread threads[numOfThreads];
     auto start = chrono::steady_clock::now();
-    cout << "Ok" << endl;
+    cout << "Nodes are all ready." << endl;
     for (int i = 0; i < numOfThreads; i++) {
         threads[i] = thread(work, i, nodes, ref(messageBox));
     }

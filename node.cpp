@@ -38,7 +38,6 @@ public:
     }
 
     void initialize(int nodeId, MessageBox* box, bool dead) {
-        cout << nodeId << " ";
         messageBox = box;
         id = nodeId;
         isDead = dead;
@@ -170,7 +169,6 @@ public:
 
 
     void send(Node nodes[], int round) {
-        cout << id << " is sending " << endl;
         set<int> receivers;
         while (receivers.size() < bandwidth) {
             int receiver = gen() % numOfNodes;
