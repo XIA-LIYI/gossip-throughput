@@ -18,7 +18,7 @@ public:
     ThreadSafeList tempMessagesReceived;
     queue<int> messagesToEnqueue;
 
-    queue<int> messageQueues[numOfNodes];
+    queue<int>* messageQueues;
     mt19937_64 gen;
     atomic<int> numOfMessagesReceived {};
     atomic<int> numOfMessagesSent {};
@@ -43,6 +43,7 @@ public:
         isDead = dead;
         messageList.set(numOfMessagesTotal);
         tempMessagesReceived.set(int(bandwidth * 4));
+        messageQueues = new queue<int>[numOfNodes];
     }
 
     void enqueue(Node nodes[]) {
