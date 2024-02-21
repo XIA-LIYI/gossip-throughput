@@ -67,15 +67,7 @@ public:
                 throw runtime_error("message not in message list");
             }
         }
-        // cout << endl;
         tempMessagesReceived.clear();
-        // cout << "Node " << id << " has " << numOfMessagesValid << " messages and has " << messageForSend.size() << " messages for send" << endl;
-        // cout << "Node " << id << " has " << endl;
-        // for (auto x: messageList) {
-        //     cout << x << " ";
-        // }
-        // cout << endl;
-
     }
 
     void removeMessageWithFullCount() {

@@ -5,5 +5,5 @@
 #SBATCH --ntasks=1 --cpus-per-task=128
 #SBATCH --ntasks-per-node=1
 #SBATCH --nodelist=xcnf14
-#SBATCH --mem=256G
+#SBATCH --mem=512G
 srun ./a.out
