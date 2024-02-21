@@ -42,7 +42,7 @@ public:
         id = nodeId;
         isDead = dead;
         messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth * 2));
+        tempMessagesReceived.set(int(bandwidth * 4));
     }
 
     void enqueue(Node nodes[]) {
