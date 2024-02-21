@@ -139,7 +139,6 @@ public:
                 continue;
             }
             nodes[receiver].receive(messageId);
-            messageQueues[receiver].pop();
             isSend = true;
         }
         if (isSend == true) {
