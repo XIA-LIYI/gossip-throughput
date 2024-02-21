@@ -95,6 +95,10 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
             nodes[j].refresh(i);
         }
         sync.wait();
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
+            nodes[j].enqueue(nodes);
+        }
+        sync.wait();
         // for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
         //     nodes[j].removeMessageWithFullCount();
         // }

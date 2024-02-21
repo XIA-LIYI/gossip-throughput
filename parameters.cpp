@@ -3,7 +3,7 @@ const int bandwidth = 167;
 const int newMessageLimit = 167;
 const int gossipRate = 32;
 const int numOfNodes = 100000;
-const int numOfThreads = 32;
+const int numOfThreads = 64;
 const int totalRounds = 1000;
 
 const int numOfMessagesTotal = 50000;

@@ -7,13 +7,17 @@
 #include "utils/threadsafelist.cpp"
 #include "utils/messagelist.cpp"
 #include "messageBox.cpp"
+#include<vector>
 using namespace std;
 
 class Node {
 public:
     int id;
-    MessageList messageList;    
+    MessageList messageList;
+
     ThreadSafeList tempMessagesReceived;
+    vector<int> messagesToEnqueue;
+
     queue<int> messageQueues[numOfNodes];
     mt19937_64 gen;
     atomic<int> numOfMessagesReceived {};
@@ -41,6 +45,24 @@ public:
         tempMessagesReceived.set(int(bandwidth * 1.5));
     }
 
+    void enqueue(Node nodes[]) {
+        for (auto message: messagesToEnqueue) {
+            set<int> nextReceivers;
+            while (nextReceivers.size() < gossipRate) {
+                int nextReceiver = gen() % numOfNodes;
+                nextReceivers.insert(nextReceiver);
+            }
+            for (auto receiver: nextReceivers) {
+                if (nodes[receiver].checkDuplicate(message)) {
+                    continue;
+                }
+                messageQueues[receiver].push(message);
+            }
+        }
+        messagesToEnqueue.clear();
+
+    }
+
     void refresh(int round) {
         numOfMessagesSent = 0;
 
@@ -53,15 +75,7 @@ public:
                 numOfMessagesValid++;
                 currMessagesValid++;
                 messageBox->addCount(messageReceived, round);
-
-                set<int> nextReceivers;
-                while (nextReceivers.size() < gossipRate) {
-                    int nextReceiver = gen() % numOfNodes;
-                    nextReceivers.insert(nextReceiver);
-                }
-                for (auto receiver: nextReceivers) {
-                    messageQueues[receiver].push(messageReceived);
-                }
+                messagesToEnqueue.push_back(messageReceived);
             }
             if (!messageList.find(messageReceived)) {
                 throw runtime_error("message not in message list");
