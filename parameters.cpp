@@ -6,7 +6,7 @@ const int numOfNodes = 100000;
 const int numOfThreads = 32;
 const int totalRounds = 1000;
 
-const int numOfMessagesTotal = 50000;
+const int numOfMessagesTotal = 5000;
 
 // bandiwth: 200Mbps new message limit: 200Mbps gossip rate: 32
 
