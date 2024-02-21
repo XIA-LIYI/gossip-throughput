@@ -13,7 +13,8 @@ using namespace std;
 class Node {
 public:
     int id;
-    MessageList messageList;
+    // MessageList messageList;
+    set<int> messageList;
 
     ThreadSafeList tempMessagesReceived;
     queue<int> messagesToEnqueue;
@@ -41,7 +42,7 @@ public:
         messageBox = box;
         id = nodeId;
         isDead = dead;
-        messageList.set(numOfMessagesTotal);
+        // messageList.set(numOfMessagesTotal);
         tempMessagesReceived.set(int(bandwidth * 1.5));
         messageQueues = new queue<int>[numOfNodes];
     }
@@ -73,27 +74,26 @@ public:
             auto res = messageList.insert(messageReceived);
             // cout << "Node " << id << " receive ";
             // cout << messageReceived << " ";
-            if (res == true) {
+            if (res.second == true) {
                 numOfMessagesValid++;
                 currMessagesValid++;
                 messageBox->addCount(messageReceived, round);
                 messagesToEnqueue.push(messageReceived);
             }
-            if (!messageList.find(messageReceived)) {
-                throw runtime_error("message not in message list");
-            }
+            // if (!messageList.find(messageReceived)) {
+            //     throw runtime_error("message not in message list");
+            // }
         }
         tempMessagesReceived.clear();
     }
 
     void removeMessageWithFullCount() {
-        // for (int i = 0; i < messageBox->messagesWithFullCount.size; i++) {
-        //     auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
-        //     numOfMessagesRemoved += x;
-        //     if (x == 0) {
-        //         cout << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
-        //     }
-        // }
+        for (int i = 0; i < messageBox->messagesWithFullCount.size; i++) {
+            auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
+            if (x == 0) {
+                cout << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
+            }
+        }
 
         // TODO: test
         // for (auto message: lst) {
@@ -110,7 +110,7 @@ public:
         if (isDead) {
             return false;
         }
-        return messageList.find(messageId);
+        return messageList.find(messageId) != messageList.end();
     }
     
     void receive(int messageId) {
