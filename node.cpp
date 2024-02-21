@@ -16,7 +16,7 @@ public:
     MessageList messageList;
 
     ThreadSafeList tempMessagesReceived;
-    vector<int> messagesToEnqueue;
+    queue<int> messagesToEnqueue;
 
     queue<int> messageQueues[numOfNodes];
     mt19937_64 gen;
@@ -46,7 +46,9 @@ public:
     }
 
     void enqueue(Node nodes[]) {
-        for (auto message: messagesToEnqueue) {
+        while (!messagesToEnqueue.empty()) {
+            auto message = messagesToEnqueue.front();
+            messagesToEnqueue.pop();
             set<int> nextReceivers;
             while (nextReceivers.size() < gossipRate) {
                 int nextReceiver = gen() % numOfNodes;
@@ -59,7 +61,6 @@ public:
                 messageQueues[receiver].push(message);
             }
         }
-        messagesToEnqueue.clear();
 
     }
 
@@ -75,7 +76,7 @@ public:
                 numOfMessagesValid++;
                 currMessagesValid++;
                 messageBox->addCount(messageReceived, round);
-                messagesToEnqueue.push_back(messageReceived);
+                messagesToEnqueue.push(messageReceived);
             }
             if (!messageList.find(messageReceived)) {
                 throw runtime_error("message not in message list");
