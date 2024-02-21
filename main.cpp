@@ -104,7 +104,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
         // }
         // sync.wait();
 
-        if (i % 5 == 0) {
+        if (i % 1 == 0) {
             // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
             //     validateSingleNode(nodes[j]);
             // }
