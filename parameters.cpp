@@ -1,6 +1,6 @@
 #pragma once
 const int bandwidth = 16667;
-const int newMessageLimit = 16667;
+const int newMessageLimit = 1667;
 const int gossipRate = 16;
 const int numOfNodes = 50000;
 const int numOfThreads = 128;
