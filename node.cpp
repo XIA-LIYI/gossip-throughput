@@ -38,7 +38,7 @@ public:
         id = nodeId;
         isDead = dead;
         messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth * 3));
+        tempMessagesReceived.set(int(bandwidth * 1.5));
     }
 
     void refresh(int round) {
