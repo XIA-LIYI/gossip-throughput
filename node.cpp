@@ -38,11 +38,12 @@ public:
     }
 
     void initialize(int nodeId, MessageBox* box, bool dead) {
+        cout << nodeId << " ";
         messageBox = box;
         id = nodeId;
         isDead = dead;
         messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth * 4));
+        tempMessagesReceived.set(int(bandwidth * 2));
         messageQueues = new queue<int>[numOfNodes];
     }
 
