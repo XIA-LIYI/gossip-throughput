@@ -123,15 +123,26 @@ public:
     void sendTo(int receiver, Node nodes[], int round) {
         // cout << "Node " << id << " wants to send to " << receiver << endl;
         // TODO: see the queue length
-        while (!messageQueues[receiver].empty()) {
+        bool isSend = false;
+        int size = messageQueues[receiver].size();
+        int k = 0;
+        while (k < size) {
+            k++;
             auto messageId = messageQueues[receiver].front();
             if (nodes[receiver].checkDuplicate(messageId)) {
                 // duplicate
                 messageQueues[receiver].pop();
                 continue;
             }
-            numOfMessagesSent++;
+            if (isSend == true) {
+                messageQueues[receiver].push(messageId);
+                continue;
+            }
             nodes[receiver].receive(messageId);
+            messageQueues[receiver].pop();
+            isSend = true;
+        }
+        if (isSend == true) {
             return;
         }
         // First trial: find a arbitrary message to send
