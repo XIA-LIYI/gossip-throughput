@@ -133,7 +133,9 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
 int main() {
     cout << "start" << endl;
     MessageBox messageBox;
+    cout << "2" << endl;
     Node* nodes = new Node[numOfNodes];
+    cout << "3" << endl;
     for (int i = 0; i < numOfDeadNodes; i++) {
         nodes[i].initialize(i, &messageBox, true);
     }
