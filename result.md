@@ -13,9 +13,9 @@ setting: 20,000 nodes, 200Mbps, 16 receivers per message
 setting: 20,000 nodes, 200Mbps, 32 receivers per message
 | metric | with attack (20% nodes are dead) | without attack|
 |:---:|:---:|:---:|
-| throughput |~30%|~55%|
-|latency||6|
-|failure|67%|0.22%|
+| throughput |~50%|~70%|
+|latency|6|4|
+|failure|14%|0.22%|
 
 setting: 30,000 nodes, 200Mbps, 16 receivers per message
 | metric | with attack (20% nodes are dead) | without attack|
