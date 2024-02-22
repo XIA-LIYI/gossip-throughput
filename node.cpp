@@ -177,17 +177,21 @@ public:
         int b = helper.getB();
         int t = rand() % numOfNodes;
         int current = 0;
-        // set<int> receivers;
-        // while (receivers.size() < bandwidth) {
-        //     int receiver = gen() % numOfNodes;
-        //     receivers.insert(receiver);
-        // }
         for (int i = 0; i < bandwidth; i++) {
             unsigned int inter = current * b + t;
             current++;
             unsigned int receiver = inter % numOfNodes;
             sendTo(receiver, nodes, round);
         }
+        // set<int> receivers;
+        // while (receivers.size() < bandwidth) {
+        //     int receiver = gen() % numOfNodes;
+        //     receivers.insert(receiver);
+        // }
+        // for (auto receiver: receivers) {
+        //     sendTo(receiver, nodes, round);
+        // }
+
     }
 };
 
