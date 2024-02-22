@@ -80,9 +80,9 @@ public:
                 messageBox->addCount(messageReceived, round);
                 messagesToEnqueue.push(messageReceived);
             }
-            // if (!messageList.find(messageReceived)) {
-            //     throw runtime_error("message not in message list");
-            // }
+            if (messageList.find(messageReceived) == messageList.end()) {
+                throw runtime_error("message not in message list");
+            }
         }
         tempMessagesReceived.clear();
     }
@@ -91,7 +91,7 @@ public:
         for (int i = 0; i < messageBox->messagesWithFullCount.size; i++) {
             auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
             if (x == 0) {
-                cout << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
+                cout << id << " " << messageBox->messagesWithFullCount.lst[i] << " " << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
             }
         }
 
@@ -136,6 +136,9 @@ public:
                 // duplicate
                 continue;
             }
+            if (messageBox->messagesCount[messageId] == (numOfNodes - numOfDeadNodes)) {
+                continue;
+            }
             if (isSend == true) {
                 messageQueues[receiver].push(messageId);
                 continue;
@@ -163,6 +166,7 @@ public:
         // messageList.insert(newMessageId);        
         // numOfMessagesValid++;
         nodes[receiver].receive(newMessageId);
+        messageList.insert(newMessageId);
         numOfMessagesSent++;
 
     }

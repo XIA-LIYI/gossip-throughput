@@ -96,8 +96,11 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
         }
         sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].enqueue(nodes);
             nodes[j].removeMessageWithFullCount();
+        }
+        sync.wait();
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
+            nodes[j].enqueue(nodes);
         }
         sync.wait();
         // for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
@@ -117,14 +120,14 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
-                // cout << "queue length is " << nodes[0].messa << endl;
-                // cout << "message list length is " << nodes[0].messageList.size() << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
             }
         }
-        messageBox.refresh();
+        if (threadId == 0) {
+            messageBox.refresh();
+        }
         sync.wait();
     }
 
