@@ -71,7 +71,7 @@ void calculateGossipLatency(MessageBox& messageBox) {
     for (int i = 0; i < 10000; i++) {
         int id = rand() % messageBox.messageId;
         if (messageBox.nintyfiveRound[id] > 0) {
-            int latency = messageBox.nintyfiveRound[id] - messageBox.startRound[id];
+            int latency = messageBox.nintyfiveRound[id] - messageBox.startRound[id] - 1;
             if (latency > maxLatency) {
                 maxLatency = latency;
             }

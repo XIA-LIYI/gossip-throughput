@@ -35,7 +35,7 @@ public:
         if (res > numOfMessagesTotal) {
             throw runtime_error("message box is full");
         }
-        messagesCount[res]++;
+        // messagesCount[res]++;
         return res;
     }
 

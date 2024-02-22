@@ -166,7 +166,7 @@ public:
         // messageList.insert(newMessageId);        
         // numOfMessagesValid++;
         nodes[receiver].receive(newMessageId);
-        messageList.insert(newMessageId);
+        // messageList.insert(newMessageId);
         numOfMessagesSent++;
 
     }
