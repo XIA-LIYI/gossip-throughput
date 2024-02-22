@@ -3,10 +3,10 @@ const int bandwidth = 16667;
 const int newMessageLimit = 16667;
 const int gossipRate = 16;
 const int numOfNodes = 20000;
-const int numOfThreads = 100;
+const int numOfThreads = 128;
 const int totalRounds = 200;
 
-const int numOfMessagesTotal = 200000;
+const int numOfMessagesTotal = 100000;
 
 // bandiwth: 200Mbps new message limit: 200Mbps gossip rate: 32
 
