@@ -6,6 +6,7 @@
 #include "parameters.cpp"
 #include "utils/threadsafelist.cpp"
 #include "utils/messagelist.cpp"
+#include "utils/helper.cpp"
 #include "messageBox.cpp"
 #include<vector>
 using namespace std;
@@ -172,13 +173,18 @@ public:
     }
 
 
-    void send(Node nodes[], int round) {
-        set<int> receivers;
-        while (receivers.size() < bandwidth) {
-            int receiver = gen() % numOfNodes;
-            receivers.insert(receiver);
-        }
-        for (auto receiver: receivers) {
+    void send(Node nodes[], int round, Helper &helper) {
+        int b = helper.getB();
+        int t = rand() % numOfNodes;
+        int current = 0;
+        // set<int> receivers;
+        // while (receivers.size() < bandwidth) {
+        //     int receiver = gen() % numOfNodes;
+        //     receivers.insert(receiver);
+        // }
+        for (int i = 0; i < bandwidth; i++) {
+            unsigned int inter = current * b + t;
+            unsigned int receiver = inter % numOfNodes;
             sendTo(receiver, nodes, round);
         }
     }

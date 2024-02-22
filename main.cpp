@@ -2,6 +2,7 @@
 #include "node.cpp"
 #include "messageBox.cpp"
 #include "utils/barrier.cpp"
+#include "utils/helper.cpp"
 #include <thread>
 using namespace std;
 
@@ -87,10 +88,10 @@ void calculateGossipLatency(MessageBox& messageBox) {
     cout << "max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
 }
 
-void work(int threadId, Node nodes[], MessageBox& messageBox) {
+void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
     for (int i = 1; i <= totalRounds; i++) {
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].send(nodes, i);
+            nodes[j].send(nodes, i, helper);
         }
         sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
@@ -136,6 +137,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox) {
 }
 
 int main() {
+    Helper helper(numOfNodes);
     MessageBox messageBox;
     Node* nodes = new Node[numOfNodes];
     for (int i = 0; i < numOfDeadNodes; i++) {
@@ -154,7 +156,7 @@ int main() {
 
     cout << "Nodes are all ready." << endl;
     for (int i = 0; i < numOfThreads; i++) {
-        threads[i] = thread(work, i, nodes, ref(messageBox));
+        threads[i] = thread(work, i, nodes, ref(messageBox), ref(helper));
     }
 
     for (int i = 0; i < numOfThreads; i++) {
