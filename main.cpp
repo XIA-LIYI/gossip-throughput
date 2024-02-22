@@ -68,6 +68,7 @@ void calculateGossipLatency(MessageBox& messageBox) {
     int sumOfLatency = 0;
     int maxLatency = 0;
     int minLatency = 9999;
+    int valid = 0;
     for (int i = 0; i < 10000; i++) {
         int id = rand() % messageBox.messageId;
         if (messageBox.nintyfiveRound[id] > 0) {
@@ -79,9 +80,10 @@ void calculateGossipLatency(MessageBox& messageBox) {
                 minLatency = latency;
             }
             sumOfLatency += latency;
+            valid++;
         }
     }
-    int averageLatency = sumOfLatency / 10000;
+    int averageLatency = sumOfLatency / valid;
     cout << "max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
 }
 
