@@ -184,6 +184,7 @@ public:
         // }
         for (int i = 0; i < bandwidth; i++) {
             unsigned int inter = current * b + t;
+            current++;
             unsigned int receiver = inter % numOfNodes;
             sendTo(receiver, nodes, round);
         }
