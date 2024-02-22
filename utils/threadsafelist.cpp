@@ -7,7 +7,7 @@ using namespace std;
 class ThreadSafeList {
 public:
     atomic<int> size = {};
-    int* lst;
+    vector<int> lst;
     int maxSize;
     int numOfRemoved = 0;
 
@@ -16,7 +16,7 @@ public:
     }
 
     void set(int size) {
-        lst = new int[size];
+        lst.resize(size);
         maxSize = size;
     }
 
