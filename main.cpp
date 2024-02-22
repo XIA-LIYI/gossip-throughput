@@ -146,6 +146,10 @@ int main() {
     int range = numOfNodes / numOfThreads;
     thread threads[numOfThreads];
     auto start = chrono::steady_clock::now();
+    cout << "Number of nodes: " << numOfNodes << endl;
+    cout << "Number of dead nodes:" << numOfDeadNodes << endl;
+    cout << "Gossip rate: " << gossipRate << endl;
+
     cout << "Nodes are all ready." << endl;
     for (int i = 0; i < numOfThreads; i++) {
         threads[i] = thread(work, i, nodes, ref(messageBox));
