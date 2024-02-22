@@ -136,19 +136,30 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
 
 }
 
+void initializeNode(int threadId, Node nodes[], MessageBox& messageBox) {
+    for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
+        if (j < numOfDeadNodes) {
+            nodes[j].initialize(j, &messageBox, true);
+        } else {
+            nodes[j].initialize(j, &messageBox, false);
+        }
+
+    }
+}
+
 int main() {
     Helper helper(numOfNodes);
     MessageBox messageBox;
     Node* nodes = new Node[numOfNodes];
-    for (int i = 0; i < numOfDeadNodes; i++) {
-        nodes[i].initialize(i, &messageBox, true);
-    }
-    for (int i = numOfDeadNodes; i < numOfNodes; i++) {
-        nodes[i].initialize(i, &messageBox, false);    
+    thread threads[numOfThreads];
+    for (int i = 0; i < numOfThreads; i++) {
+        threads[i] = thread(initializeNode, i, nodes, ref(messageBox));
     }
 
-    int range = numOfNodes / numOfThreads;
-    thread threads[numOfThreads];
+    for (int i = 0; i < numOfThreads; i++) {
+        threads[i].join();
+    }
+    
     auto start = chrono::steady_clock::now();
     cout << "Number of nodes: " << numOfNodes << endl;
     cout << "Number of dead nodes:" << numOfDeadNodes << endl;
