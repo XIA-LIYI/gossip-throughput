@@ -14,6 +14,7 @@ public:
     // list<int> messagesWithFullCount;
     ThreadSafeList messagesWithFullCount;
     atomic<int> numOfMessageRemoved {};
+    atomic<int> numOfMessagesWith95Count {};
 
     int startRound[numOfMessagesTotal] = {};
     int nintyfiveRound[numOfMessagesTotal] = {};
@@ -48,6 +49,7 @@ public:
         messagesCount[messageId]++;
         if (messagesCount[messageId] == int((numOfNodes - numOfDeadNodes) * 0.95)) {
             nintyfiveRound[messageId] = round;
+            numOfMessagesWith95Count++;
         }
 
         if (messagesCount[messageId] == numOfNodes - numOfDeadNodes) {

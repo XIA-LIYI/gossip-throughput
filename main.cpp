@@ -123,6 +123,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
+                cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
