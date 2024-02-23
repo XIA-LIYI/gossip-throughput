@@ -22,7 +22,7 @@ bool isPrime(int x) {
 }
 
 void Helper::generatePrimes(int n) {
-    int max_prime = 300;
+    int max_prime = 3000;
     if (n > max_prime) {
         n = max_prime;
     }

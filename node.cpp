@@ -179,11 +179,14 @@ public:
     void send(Node nodes[], int round, Helper &helper) {
         int b = helper.getB();
         int t = rand() % numOfNodes;
-        int current = 0;
+        int current = rand() % numOfNodes;
         for (int i = 0; i < bandwidth; i++) {
             unsigned int inter = current * b + t;
-            current++;
             unsigned int receiver = inter % numOfNodes;
+            current++;
+            if (current == numOfNodes) {
+                current = 0;
+            }
             sendTo(receiver, nodes, round);
         }
         // set<int> receivers;
