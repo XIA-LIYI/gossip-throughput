@@ -1,2 +1,3 @@
-1. every message is pushed into queue when messageReceived
-2. every node is selected randomly and pop all of the message it has, if no such, find from message list or generate a new message
+1. reduce speed
+2. test if the server allows to apply for such a big memory
+3. write perfect deduplication
