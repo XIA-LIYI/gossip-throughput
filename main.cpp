@@ -91,14 +91,20 @@ void calculateGossipLatency(MessageBox& messageBox) {
 void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
     for (int i = 1; i <= totalRounds; i++) {
         // each small round
+
         for (int j = 0; j < bandwidth; j++) {
-            int b = helper.getB();
-            int t = rand() % numOfNodes;
-            int current = (numOfNodes / numOfThreads) * threadId;
-            for (int j = 0; (j < (numOfNodes / numOfThreads)) && (j < numOfNodes); j++) {
-                nodes[current].send(nodes, i, helper);
-                current++;
-            }           
+            if (threadId == 0) {
+                b = helper.getB();
+                t = rand() % numOfNodes;
+            }
+            sync.wait();
+            int start = (numOfNodes / numOfThreads) * threadId;
+            for (int k = start; (k < start + int(numOfNodes / numOfThreads)) && (k < numOfNodes); k++) {
+                unsigned int inter = k * b + t;
+                unsigned int curr = inter % numOfNodes;
+                nodes[curr].send(nodes, i, helper);
+            }
+            sync.wait();      
         }
         sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
@@ -109,10 +115,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
 
 
         if (i % logFrequency == 0) {
-            // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
-            //     validateSingleNode(nodes[j]);
-            // }
-            // sync.wait();
+
             if (threadId == 0) {
                 cout << "Round " << i << " finishes." << endl;
                 // validateAll(nodes, i);
@@ -122,7 +125,8 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
                 cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;
                 
-                cout << nodes[0].messageBox->messagesCount[1] << endl;calculateThroughput(nodes, i * bandwidth);
+                cout << nodes[0].messageBox->messagesCount[0] << endl;
+                calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
             }

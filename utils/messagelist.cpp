@@ -6,7 +6,6 @@ using namespace std;
 
 class MessageList {
 public:
-    atomic<int> head;
 
     bool* lst;
     int maxSize;

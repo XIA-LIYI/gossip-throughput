@@ -47,7 +47,7 @@ public:
         id = nodeId;
         isDead = dead;
         messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth), "NODE " + to_string(nodeId));
+        tempMessagesReceived.set(int(bandwidth * 1.5), "NODE " + to_string(nodeId));
         for (int i = 0; i < numOfNodes; i++) {
             queue<int> q;
             messageQueues.push_back(q);
@@ -68,9 +68,9 @@ public:
                 nextReceivers.insert(nextReceiver);
             }
             for (auto receiver: nextReceivers) {
-                // if (nodes[receiver].find(messageReceived)) {
-                //     continue;
-                // }
+                if (nodes[receiver].find(messageReceived)) {
+                    continue;
+                }
                 messageQueues[receiver].push(messageReceived);
             }
 
@@ -104,10 +104,11 @@ public:
             return;
         }
         int currNumOfMessagesReceived = numOfMessagesReceived++;
-        if (currNumOfMessagesReceived >= bandwidth) {
+        if (currNumOfMessagesReceived >= bandwidth * 1.5) {
             // dropped
             return;
         }
+
         tempMessagesReceived.push(messageId);
 
     }
@@ -115,7 +116,6 @@ public:
     void sendTo(int receiver, Node nodes[], int round) {
         int size = messageQueues[receiver].size();
         int k = 0;
-        bool isSend = false;
         while (k < size) {
             k++;
             auto messageId = messageQueues[receiver].front();
@@ -127,14 +127,12 @@ public:
             if (messageBox->messagesCount[messageId] == (numOfNodes - numOfDeadNodes)) {
                 continue;
             }           
-            if (isSend) {
-                messageQueues[receiver].push(messageId);
-                continue;
-            }
+            // if (isSend) {
+            //     messageQueues[receiver].push(messageId);
+            //     continue;
+            // }
+
             nodes[receiver].receive(messageId);
-            isSend = true;
-        }
-        if (isSend == true) {
             return;
         }
         int newMessageId = messageBox->generateNewMessage(round);
@@ -150,7 +148,7 @@ public:
 
 
     void send(Node nodes[], int round, Helper &helper) {
-        for (int i = 0; i < bandwidth; i++) {
+        // for (int i = 0; i < bandwidth; i++) {
             unsigned int inter = current * b + t;
             unsigned int receiver = inter % numOfNodes;
             current++;
@@ -158,16 +156,7 @@ public:
                 current = 0;
             }
             sendTo(receiver, nodes, round);
-        }
-        // set<int> receivers;
-        // while (receivers.size() < bandwidth) {
-        //     int receiver = gen() % numOfNodes;
-        //     receivers.insert(receiver);
         // }
-        // for (auto receiver: receivers) {
-        //     sendTo(receiver, nodes, round);
-        // }
-
     }
 };
 
