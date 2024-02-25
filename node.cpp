@@ -14,8 +14,8 @@ using namespace std;
 class Node {
 public:
     int id;
-    // MessageList messageList;
-    set<int> messageList;
+    MessageList messageList;
+    // set<int> messageList;
 
     ThreadSafeList tempMessagesReceived;
     queue<int> messagesToEnqueue;
@@ -33,6 +33,9 @@ public:
 
     MessageBox* messageBox;
 
+    // random generator
+    int t, b, current = 0;
+
     Node() {
         
         random_device rd;
@@ -43,78 +46,56 @@ public:
         messageBox = box;
         id = nodeId;
         isDead = dead;
-        // messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth * 1.5));
+        messageList.set(numOfMessagesTotal);
+        tempMessagesReceived.set(int(bandwidth), "NODE " + to_string(nodeId));
         for (int i = 0; i < numOfNodes; i++) {
             queue<int> q;
             messageQueues.push_back(q);
         }
     }
 
-    void enqueue(Node nodes[]) {
-        while (!messagesToEnqueue.empty()) {
-            auto message = messagesToEnqueue.front();
-            messagesToEnqueue.pop();
+
+    void refresh(Node nodes[], Helper &helper, int round) {
+        while (!tempMessagesReceived.empty()) {
+            int messageReceived = tempMessagesReceived.pop();
+            numOfMessagesValid++;
+            currMessagesValid++;
+            messageBox->addCount(messageReceived, round);
+
             set<int> nextReceivers;
             while (nextReceivers.size() < gossipRate) {
                 int nextReceiver = gen() % numOfNodes;
                 nextReceivers.insert(nextReceiver);
             }
             for (auto receiver: nextReceivers) {
-                if (nodes[receiver].checkDuplicate(message)) {
-                    continue;
-                }
-                messageQueues[receiver].push(message);
+                // if (nodes[receiver].find(messageReceived)) {
+                //     continue;
+                // }
+                messageQueues[receiver].push(messageReceived);
             }
-        }
 
-    }
-
-    void refresh(int round) {
-        numOfMessagesSent = 0;
-
-        while (!tempMessagesReceived.empty()) {
-            int messageReceived = tempMessagesReceived.pop();
-            auto res = messageList.insert(messageReceived);
-            // cout << "Node " << id << " receive ";
-            // cout << messageReceived << " ";
-            if (res.second == true) {
-                numOfMessagesValid++;
-                currMessagesValid++;
-                messageBox->addCount(messageReceived, round);
-                messagesToEnqueue.push(messageReceived);
-            }
-            if (messageList.find(messageReceived) == messageList.end()) {
+            if (!messageList.find(messageReceived)) {
                 throw runtime_error("message not in message list");
             }
         }
         tempMessagesReceived.clear();
+
+        b = helper.getB();
+        t = rand() % numOfNodes;
+        current = rand() % numOfNodes;
+
+        numOfMessagesReceived = 0;
     }
 
-    void removeMessageWithFullCount() {
-        for (int i = 0; i < messageBox->messagesWithFullCount.size; i++) {
-            auto x = messageList.erase(messageBox->messagesWithFullCount.lst[i]);
-            if (x == 0) {
-                cout << id << " " << messageBox->messagesWithFullCount.lst[i] << " " << messageBox->messagesCount[messageBox->messagesWithFullCount.lst[i]] << endl;
-            }
-        }
-
-        // TODO: test
-        // for (auto message: lst) {
-        //     auto x = messageList.erase(message);
-        //     numOfMessagesRemoved += x;
-        //     if (x == 0) {
-        //         cout << messageBox->messagesCount[message] << endl;
-        //     }
-        // }
-
+    bool find(int messageId) {
+        return messageList.find(messageId);
     }
 
     bool checkDuplicate(int messageId) {
         if (isDead) {
             return false;
         }
-        return messageList.find(messageId) != messageList.end();
+        return messageList.checkDuplicate(messageId);
     }
     
     void receive(int messageId) {
@@ -122,16 +103,19 @@ public:
         if (isDead) {
             return;
         }
-        // numOfMessagesReceived++;
+        int currNumOfMessagesReceived = numOfMessagesReceived++;
+        if (currNumOfMessagesReceived >= bandwidth) {
+            // dropped
+            return;
+        }
         tempMessagesReceived.push(messageId);
+
     }
 
     void sendTo(int receiver, Node nodes[], int round) {
-        // cout << "Node " << id << " wants to send to " << receiver << endl;
-        // TODO: see the queue length
-        bool isSend = false;
         int size = messageQueues[receiver].size();
         int k = 0;
+        bool isSend = false;
         while (k < size) {
             k++;
             auto messageId = messageQueues[receiver].front();
@@ -142,8 +126,8 @@ public:
             }
             if (messageBox->messagesCount[messageId] == (numOfNodes - numOfDeadNodes)) {
                 continue;
-            }
-            if (isSend == true) {
+            }           
+            if (isSend) {
                 messageQueues[receiver].push(messageId);
                 continue;
             }
@@ -153,33 +137,19 @@ public:
         if (isSend == true) {
             return;
         }
-        // First trial: find a arbitrary message to send
-        // for (auto messageId: ) {
-
-        // }
-
-        // Second trial: generate a new message to send
         int newMessageId = messageBox->generateNewMessage(round);
         if (newMessageId == -1) {
             return;
         }
-        // cout << "Node " << id << " generates " << newMessageId << endl;
-        // cout << "Node " << id << " sends to " << receiver << " with message " << newMessageId << endl;
-        
-        // TODO: see any other implementation method
-        // messageList.insert(newMessageId);        
-        // numOfMessagesValid++;
-        nodes[receiver].receive(newMessageId);
-        // messageList.insert(newMessageId);
-        numOfMessagesSent++;
-
+        if (checkDuplicate(newMessageId)) {
+            // duplicate
+            return;
+        }
+        receive(newMessageId);
     }
 
 
     void send(Node nodes[], int round, Helper &helper) {
-        int b = helper.getB();
-        int t = rand() % numOfNodes;
-        int current = rand() % numOfNodes;
         for (int i = 0; i < bandwidth; i++) {
             unsigned int inter = current * b + t;
             unsigned int receiver = inter % numOfNodes;

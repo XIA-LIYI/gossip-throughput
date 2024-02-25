@@ -92,36 +92,21 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
     for (int i = 1; i <= totalRounds; i++) {
         // each small round
         for (int j = 0; j < bandwidth; j++) {
-            
+            int b = helper.getB();
+            int t = rand() % numOfNodes;
+            int current = (numOfNodes / numOfThreads) * threadId;
+            for (int j = 0; (j < (numOfNodes / numOfThreads)) && (j < numOfNodes); j++) {
+                nodes[current].send(nodes, i, helper);
+                current++;
+            }           
         }
-        int b = helper.getB();
-        int t = rand() % numOfNodes;
-        int current = (numOfNodes / numOfThreads) * threadId;
-        for (int j = 0; (j < (numOfNodes / numOfThreads)) && (j < numOfNodes); j++) {
-            nodes[current].send(nodes, i, helper);
-            current++;
+        sync.wait();
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
+            // refresh
+            nodes[j].refresh(nodes, helper, i);
+        }
+        sync.wait();
 
-        }
-        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].send(nodes, i, helper);
-        }
-        sync.wait();
-        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].refresh(i);
-        }
-        sync.wait();
-        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].removeMessageWithFullCount();
-        }
-        sync.wait();
-        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-            nodes[j].enqueue(nodes);
-        }
-        sync.wait();
-        // for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
-        //     nodes[j].removeMessageWithFullCount();
-        // }
-        // sync.wait();
 
         if (i % logFrequency == 0) {
             // for (int j = threadId; j < numOfNodes; j = j + numOfThreads) {
@@ -136,7 +121,8 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
                 cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;
-                calculateThroughput(nodes, i * bandwidth);
+                
+                cout << nodes[0].messageBox->messagesCount[1] << endl;calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
             }

@@ -11,13 +11,16 @@ public:
     int maxSize;
     int numOfRemoved = 0;
 
+    string usageType;
+
 
     ThreadSafeList() {
     }
 
-    void set(int size) {
+    void set(int size, string type) {
         lst = new int[size];
         maxSize = size;
+        usageType = type;
     }
 
     void push(int element) {
@@ -25,7 +28,7 @@ public:
         if (currentTail < maxSize) {
             lst[currentTail] = element;
         } else {
-            throw runtime_error(" queue is full");
+            throw runtime_error(usageType + " queue is full");
         }
     }
 
