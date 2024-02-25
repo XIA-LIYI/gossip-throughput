@@ -1,3 +1,5 @@
 1. reduce speed
 2. test if the server allows to apply for such a big memory
 3. write perfect deduplication
+
+the problem of perfect deduplication: when asked, yes but when received no?

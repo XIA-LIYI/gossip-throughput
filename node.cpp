@@ -47,7 +47,7 @@ public:
         id = nodeId;
         isDead = dead;
         messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth * 1.5), "NODE " + to_string(nodeId));
+        tempMessagesReceived.set(int(bandwidth * 1.1), "NODE " + to_string(nodeId));
         for (int i = 0; i < numOfNodes; i++) {
             queue<int> q;
             messageQueues.push_back(q);
@@ -104,7 +104,7 @@ public:
             return;
         }
         int currNumOfMessagesReceived = numOfMessagesReceived++;
-        if (currNumOfMessagesReceived >= bandwidth * 1.5) {
+        if (currNumOfMessagesReceived >= int(bandwidth * 1.1)) {
             // dropped
             return;
         }
