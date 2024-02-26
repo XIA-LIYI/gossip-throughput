@@ -134,11 +134,29 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
             }
         }
         if (threadId == 0) {
-            messageBox.refresh();
+            messageBox.refresh(i);
         }
         sync.wait();
     }
 
+}
+
+void printResult(MessageBox& messageBox) {
+    // Row is round. Each row contains min, max, ave;
+    int requiredMessage = messageBox.messageId * 0.6;
+    for (int round = 0; round < messageRecordFrequency; round++) {
+        float sum = 0.0;
+        for (int message = 0; message < requiredMessage; message++) {
+            sum += messageBox.progress[message][round];
+        }
+        float average = sum / float(requiredMessage);
+        float variance = 0.0;
+        for (int message = 0; message < requiredMessage; message++) {
+            variance += pow(messageBox.progress[message][round] - average, 2.0);
+        }
+        float std = sqrt(variance);
+        cout << round << " " << average << " " << std << endl; 
+    }
 }
 
 int main() {
@@ -175,4 +193,5 @@ int main() {
     cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
     cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
     calculateGossipLatency(messageBox);
+    printResult(messageBox);
 }

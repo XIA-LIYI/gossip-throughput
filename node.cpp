@@ -135,7 +135,7 @@ public:
         if (newMessageId == -1) {
             return;
         }
-        nodes[receiver].receive(newMessageId);
+        receive(newMessageId);
     }
 
 

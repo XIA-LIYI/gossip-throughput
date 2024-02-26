@@ -12,23 +12,24 @@ public:
     atomic<int> messageId {};
     atomic<int> messagesCount[numOfMessagesTotal] = {};
     // list<int> messagesWithFullCount;
-    ThreadSafeList messagesWithFullCount;
+    // ThreadSafeList messagesWithFullCount;
     atomic<int> numOfMessageRemoved {};
     atomic<int> numOfMessagesWith95Count {};
 
     int startRound[numOfMessagesTotal] = {};
     int nintyfiveRound[numOfMessagesTotal] = {};
+    float progress[numOfMessagesTotal][messageRecordFrequency] = {};
 
     MessageBox() {
-        messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
+        // messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
     }
 
     int generateNewMessage(int round) {
-        if (messageId >= numOfMessagesTotal) {
-            return -1;
-        }
-        numOfNewMessage++;
-        if (numOfNewMessage > newMessageLimit) {
+        // if (messageId >= numOfMessagesTotal) {
+        //     return -1;
+        // }
+        int currNumOfNewMessage = ++numOfNewMessage;
+        if (currNumOfNewMessage > newMessageLimit) {
             return -1;
         }
         int res = messageId++;
@@ -40,9 +41,10 @@ public:
         return res;
     }
 
-    void refresh() {
+    void refresh(int round) {
         numOfNewMessage = 0;
-        messagesWithFullCount.clear();
+        // messagesWithFullCount.clear();
+        generateData(round);
     }
 
     void addCount(int messageId, int round) {
@@ -53,8 +55,20 @@ public:
         }
 
         if (currMessageCount == numOfNodes - numOfDeadNodes) {
-            messagesWithFullCount.push(messageId);
+            // messagesWithFullCount.push(messageId);
             numOfMessageRemoved++;
+        }
+    }
+
+
+    void generateData(int round) {
+        for (int i = 0; i < messageId; i++) {
+            int roundDiff = round - startRound[i];
+            if (roundDiff >= messageRecordFrequency) {
+                continue;
+            }
+            float percentage = float(messagesCount[i]) / float(numOfNodes - numOfDeadNodes);
+            progress[i][roundDiff] = percentage;
         }
     }
 
