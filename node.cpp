@@ -8,6 +8,7 @@
 #include "utils/messagelist.cpp"
 #include "utils/helper.cpp"
 #include "messageBox.cpp"
+#include<mutex>
 #include<vector>
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
     atomic<int> numOfMessagesSent {};
     int numOfMessagesValid = 0;
     int currMessagesValid = 0;
+    mutex mtx;
     // int numOfMessagesRemoved = 0;
 
     // for attack
@@ -47,7 +49,7 @@ public:
         id = nodeId;
         isDead = dead;
         messageList.set(numOfMessagesTotal);
-        tempMessagesReceived.set(int(bandwidth * 1.1), "NODE " + to_string(nodeId));
+        tempMessagesReceived.set(int(bandwidth), "NODE " + to_string(nodeId));
         for (int i = 0; i < numOfNodes; i++) {
             queue<int> q;
             messageQueues.push_back(q);
@@ -91,27 +93,22 @@ public:
         return messageList.find(messageId);
     }
 
-    bool checkDuplicate(int messageId) {
-        if (isDead) {
+    bool receive(int messageId) {
+        // if (isDead) {
+        //     return false;
+        // }
+        lock_guard<mutex> lk(mtx);
+        if (numOfMessagesReceived >= int(bandwidth)) {
+            return true;
+        }
+        if (messageList.checkDuplicate(messageId)) {
             return false;
         }
-        return messageList.checkDuplicate(messageId);
-    }
-    
-    void receive(int messageId) {
-        // cout << "Node " << id << " receives " << messageId << endl;
-        if (isDead) {
-            return;
-        }
-        int currNumOfMessagesReceived = numOfMessagesReceived++;
-        if (currNumOfMessagesReceived >= int(bandwidth * 1.1)) {
-            // dropped
-            return;
-        }
-
+        numOfMessagesReceived++;
         tempMessagesReceived.push(messageId);
-
+        return true;
     }
+
 
     void sendTo(int receiver, Node nodes[], int round) {
         int size = messageQueues[receiver].size();
@@ -120,7 +117,8 @@ public:
             k++;
             auto messageId = messageQueues[receiver].front();
             messageQueues[receiver].pop();
-            if (nodes[receiver].checkDuplicate(messageId)) {
+            bool result = nodes[receiver].receive(messageId);
+            if (!result) {
                 // duplicate
                 continue;
             }
@@ -131,19 +129,13 @@ public:
             //     messageQueues[receiver].push(messageId);
             //     continue;
             // }
-
-            nodes[receiver].receive(messageId);
             return;
         }
         int newMessageId = messageBox->generateNewMessage(round);
         if (newMessageId == -1) {
             return;
         }
-        if (checkDuplicate(newMessageId)) {
-            // duplicate
-            return;
-        }
-        receive(newMessageId);
+        nodes[receiver].receive(newMessageId);
     }
 
 
