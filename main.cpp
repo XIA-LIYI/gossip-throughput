@@ -91,7 +91,6 @@ void calculateGossipLatency(MessageBox& messageBox) {
 void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
     for (int i = 1; i <= totalRounds; i++) {
         // each small round
-
         for (int j = 0; j < bandwidth; j++) {
             if (threadId == 0) {
                 b = helper.getB();
@@ -102,6 +101,9 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
             for (int k = start; (k < start + int(numOfNodes / numOfThreads)) && (k < numOfNodes); k++) {
                 unsigned int inter = k * b + t;
                 unsigned int curr = inter % numOfNodes;
+                if (curr < numOfDeadNodes) {
+                    continue;
+                }
                 nodes[curr].send(nodes, i, helper);
             }
             sync.wait();      

@@ -94,10 +94,10 @@ public:
     }
 
     bool receive(int messageId) {
-        // if (isDead) {
-        //     return false;
-        // }
         lock_guard<mutex> lk(mtx);
+        if (isDead) {
+            return true;
+        }
         if (numOfMessagesReceived >= int(bandwidth)) {
             return true;
         }
