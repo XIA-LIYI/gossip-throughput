@@ -46,13 +46,13 @@ public:
     }
 
     void addCount(int messageId, int round) {
-        messagesCount[messageId]++;
-        if (messagesCount[messageId] == int((numOfNodes - numOfDeadNodes) * 0.95)) {
+        int currMessageCount = ++messagesCount[messageId];
+        if (currMessageCount == int((numOfNodes - numOfDeadNodes) * 0.95)) {
             nintyfiveRound[messageId] = round;
             numOfMessagesWith95Count++;
         }
 
-        if (messagesCount[messageId] == numOfNodes - numOfDeadNodes) {
+        if (currMessageCount == numOfNodes - numOfDeadNodes) {
             messagesWithFullCount.push(messageId);
             numOfMessageRemoved++;
         }
