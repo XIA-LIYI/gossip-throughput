@@ -18,10 +18,13 @@ public:
 
     int startRound[numOfMessagesTotal] = {};
     int nintyfiveRound[numOfMessagesTotal] = {};
-    float progress[numOfMessagesTotal][messageRecordFrequency] = {};
+    float* progress[numOfMessagesTotal] = {};
 
     MessageBox() {
         // messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
+        for (int i = 0; i < numOfMessagesTotal; i++) {
+            progress[i] = new float[messageRecordFrequency];
+        }
     }
 
     int generateNewMessage(int round) {
