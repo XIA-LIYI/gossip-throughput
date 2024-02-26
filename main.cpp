@@ -150,11 +150,11 @@ void printResult(MessageBox& messageBox) {
             sum += messageBox.progress[message][round];
         }
         float average = sum / float(requiredMessage);
-        float variance = 0.0;
+        float varianceSum = 0.0;
         for (int message = 0; message < requiredMessage; message++) {
-            variance += pow(messageBox.progress[message][round] - average, 2.0);
+            varianceSum += pow(messageBox.progress[message][round] - average, 2.0);
         }
-        float std = sqrt(variance);
+        float std = sqrt(varianceSum / requiredMessage);
         cout << round << " " << average << " " << std << endl; 
     }
 }
