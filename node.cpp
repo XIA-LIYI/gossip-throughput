@@ -117,14 +117,15 @@ public:
             k++;
             auto messageId = messageQueues[receiver].front();
             messageQueues[receiver].pop();
+            if (messageBox->messagesCount[messageId] == (numOfNodes - numOfDeadNodes)) {
+                continue;
+            } 
             bool result = nodes[receiver].receive(messageId);
             if (!result) {
                 // duplicate
                 continue;
             }
-            if (messageBox->messagesCount[messageId] == (numOfNodes - numOfDeadNodes)) {
-                continue;
-            }           
+          
             // if (isSend) {
             //     messageQueues[receiver].push(messageId);
             //     continue;
