@@ -85,7 +85,7 @@ void calculateGossipLatency(MessageBox& messageBox) {
         }
     }
     int averageLatency = sumOfLatency / valid;
-    cout << "max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
+    cout << "valid: " << valid << " max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
 }
 
 void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
@@ -125,8 +125,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
-                cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;
-                
+                cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;                
                 cout << nodes[0].messageBox->messagesCount[0] << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
@@ -146,10 +145,15 @@ void printResult(MessageBox& messageBox) {
     int requiredMessage = messageBox.messageId * 0.6;
     for (int round = 0; round < messageRecordFrequency; round++) {
         float sum = 0.0;
+        int valid = 0;
         for (int message = 0; message < requiredMessage; message++) {
+            if (messageBox.progress[message][round] == 0.0) {
+                continue;
+            }
             sum += messageBox.progress[message][round];
+            valid++;
         }
-        float average = sum / float(requiredMessage);
+        float average = sum / float(valid);
         float varianceSum = 0.0;
         for (int message = 0; message < requiredMessage; message++) {
             varianceSum += pow(messageBox.progress[message][round] - average, 2.0);

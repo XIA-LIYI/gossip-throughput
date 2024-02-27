@@ -31,6 +31,9 @@ public:
         // if (messageId >= numOfMessagesTotal) {
         //     return -1;
         // }
+        if (round > usefulRound) {
+            return -1;
+        }
         int currNumOfNewMessage = ++numOfNewMessage;
         if (currNumOfNewMessage > newMessageLimit) {
             return -1;
@@ -47,7 +50,10 @@ public:
     void refresh(int round) {
         numOfNewMessage = 0;
         // messagesWithFullCount.clear();
-        generateData(round);
+        if (round < usefulRound) {
+            generateData(round);
+        }
+        
     }
 
     void addCount(int messageId, int round) {
