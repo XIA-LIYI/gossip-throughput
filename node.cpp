@@ -18,6 +18,8 @@ public:
     MessageList messageList;
     // set<int> messageList;
 
+    set<int> targets;
+
     ThreadSafeList tempMessagesReceived;
     queue<int> messagesToEnqueue;
 
@@ -82,9 +84,11 @@ public:
         }
         tempMessagesReceived.clear();
 
-        b = helper.getB();
-        t = rand() % numOfNodes;
-        current = rand() % numOfNodes;
+        // b = helper.getB();
+        // t = rand() % numOfNodes;
+        // current = rand() % numOfNodes;
+
+        targets.clear();
 
         numOfMessagesReceived = 0;
     }
@@ -142,11 +146,19 @@ public:
 
     void send(Node nodes[], int round, Helper &helper) {
         // for (int i = 0; i < bandwidth; i++) {
-            unsigned int inter = current * b + t;
-            unsigned int receiver = inter % numOfNodes;
-            current++;
-            if (current == numOfNodes) {
-                current = 0;
+            // unsigned int inter = current * b + t;
+            // unsigned int receiver = inter % numOfNodes;
+            // current++;
+            // if (current == numOfNodes) {
+            //     current = 0;
+            // }
+            int receiver;
+            while (true) {
+                receiver = rand() % numOfNodes;
+                if (targets.find(receiver) == targets.end()) {
+                    targets.insert(receiver);
+                    break;
+                }
             }
             sendTo(receiver, nodes, round);
         // }
