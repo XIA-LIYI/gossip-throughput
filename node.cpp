@@ -18,7 +18,7 @@ public:
     MessageList messageList;
     // set<int> messageList;
 
-    set<int> targets;
+    bool targets[numOfNodes] = {};
 
     ThreadSafeList tempMessagesReceived;
     queue<int> messagesToEnqueue;
@@ -88,7 +88,9 @@ public:
         // t = rand() % numOfNodes;
         // current = rand() % numOfNodes;
 
-        targets.clear();
+        for (int i = 0; i < numOfNodes; i++) {
+            targets[i] = false;
+        }
 
         numOfMessagesReceived = 0;
     }
@@ -154,9 +156,9 @@ public:
             // }
             int receiver;
             while (true) {
-                receiver = rand() % numOfNodes;
-                if (targets.find(receiver) == targets.end()) {
-                    targets.insert(receiver);
+                receiver = gen() % numOfNodes;
+                if (targets[receiver] == false) {
+                    targets[receiver] = true;
                     break;
                 }
             }
