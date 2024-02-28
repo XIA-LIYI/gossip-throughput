@@ -98,7 +98,13 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
             }
             sync.wait();
             int start = (numOfNodes / numOfThreads) * threadId;
-            for (int k = start; (k < start + int(numOfNodes / numOfThreads)) && (k < numOfNodes); k++) {
+            int end;
+            if (threadId == numOfThreads - 1) {
+                end = numOfNodes;
+            } else {
+                end = start + int(numOfNodes / numOfThreads);
+            }
+            for (int k = start; k < end; k++) {
                 unsigned int inter = k * b + t;
                 unsigned int curr = inter % numOfNodes;
                 if (curr < numOfDeadNodes) {
@@ -106,7 +112,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 }
                 nodes[curr].send(nodes, i, helper);
             }
-            sync.wait();      
+            sync.wait();     
         }
         sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
