@@ -91,7 +91,7 @@ void calculateGossipLatency(MessageBox& messageBox) {
 void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
     for (int i = 1; i <= totalRounds; i++) {
         // each small round
-        for (int j = 0; j < bandwidth; j++) {
+        for (int j = 0; j < int(bandwidth); j++) {
             if (threadId == 0) {
                 b = helper.getB();
                 t = rand() % numOfNodes;
@@ -132,6 +132,12 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
                 cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;                
+                if (messageBox.numOfNewMessage > newMessageLimit) {
+                    cout << "New message: " << newMessageLimit << endl;
+                } else {
+                    cout << "New message: " << messageBox.numOfNewMessage << endl;
+                }
+                
                 cout << nodes[0].messageBox->messagesCount[0] << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
