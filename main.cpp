@@ -192,6 +192,8 @@ int main() {
     cout << "Number of nodes: " << numOfNodes << endl;
     cout << "Number of dead nodes:" << numOfDeadNodes << endl;
     cout << "Gossip rate: " << gossipRate << endl;
+    cout << "bandwith: " << bandwidth << endl;
+    cout << "new message limit: " << newMessageLimit << endl;
 
     cout << "Nodes are all ready." << endl;
     for (int i = 0; i < numOfThreads; i++) {
