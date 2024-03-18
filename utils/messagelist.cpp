@@ -32,6 +32,10 @@ public:
     //     return true;
     // }
 
+    void insert(int messageId) {
+        lst[messageId] = true;
+    }
+
     bool find(int messageId) {
         return lst[messageId];
     }
