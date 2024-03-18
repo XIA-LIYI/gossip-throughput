@@ -1,5 +1,14 @@
-1. reduce speed
-2. test if the server allows to apply for such a big memory
-3. write perfect deduplication
+1. circular buffer or set?
+2. calculate memory
 
-the problem of perfect deduplication: when asked, yes but when received no?
+
+1. queueing effect happends when system runs at full capacity
+2. identify the inheritent tradeoff of throughput and latency
+3. realistic injection method
+4. avoid infinite queue and still realistic 
+5. cannot expect global information
+6. explore different methods: 
+    a. depend on queue length, does not seem to work well because it is not always the case
+    what we care is number of real items that cause latency. but average queue length does not tell us
+    b. relate to dummy message 
+

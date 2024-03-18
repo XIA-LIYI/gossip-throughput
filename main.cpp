@@ -9,15 +9,6 @@ using namespace std;
 
 Barrier sync(numOfThreads);
 
-void validateSingleNode(Node &node) {
-    // 1. size of message list + number of removed = number of valid
-    // if (node.messageList.size() + node.messageBox->numOfMessageRemoved != node.numOfMessagesValid) {
-    //     cout << node.messageList.size() << " " << node.messageBox->numOfMessageRemoved << " " << node.numOfMessagesValid;
-    //     throw runtime_error("Fail condition 1");
-    // }
-    // 2. total received 
-}
-
 void validateAll(Node nodes[], int round) {
     int totalReceived = 0;
     for (int i = 0; i < numOfNodes; i++) {
@@ -71,10 +62,9 @@ void calculateGossipLatency(MessageBox& messageBox) {
     int maxLatency = 0;
     int minLatency = 9999;
     int valid = 0;
-    for (int i = 0; i < 50000; i++) {
-        int id = rand() % int(messageBox.messageId * 0.6);
-        if (messageBox.nintyfiveRound[id] > 0) {
-            int latency = messageBox.nintyfiveRound[id] - messageBox.startRound[id] - 1;
+    for (int i = 0; i < numOfMessageRecord; i++) {
+        if (messageBox.nintyfiveRound[i] > 0) {
+            int latency = messageBox.nintyfiveRound[i] - messageBox.startRound[i] - 1;
             if (latency > maxLatency) {
                 maxLatency = latency;
             }
@@ -144,14 +134,13 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
 
             if (threadId == 0) {
                 cout << "Round " << i << " finishes." << endl;
-                // validateAll(nodes, i);
 
                 cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
                 cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;                
                 cout << "New message: " << messageBox.numOfNewMessage << endl;
-                cout << nodes[0].messageBox->messagesCount[1] << endl;
+                // cout << nodes[0].messageBox->messagesCount[1] << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;

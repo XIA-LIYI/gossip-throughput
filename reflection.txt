@@ -1,0 +1,6 @@
+1. make sure understanding is correct and use the method i am familar with
+2. use familar data structures as well, understand the property of data structures well before using it, like clear
+3. write the test code for each component
+4. manually check the code flow
+5. figure out the potential mistakes and avoid it.
+6. add sanity check to monitor if intermediate results are same as expected

@@ -12,21 +12,21 @@ class MessageBox {
 public:
     atomic<int> numOfNewMessage {};
     atomic<int> messageId {};
-    atomic<int> messagesCount[numOfMessagesTotal] = {};
+    atomic<int>* messagesCount = new atomic<int>[numOfMessagesTotal]{};
     // list<int> messagesWithFullCount;
     // ThreadSafeList messagesWithFullCount;
     atomic<int> numOfMessageRemoved {};
     atomic<int> numOfMessagesWith95Count {};
 
-    int startRound[numOfMessagesTotal] = {};
-    int nintyfiveRound[numOfMessagesTotal] = {};
-    float* progress[numOfMessagesTotal] = {};
+    int* startRound = new int[numOfMessageRecord]{};
+    int* nintyfiveRound= new int[numOfMessageRecord]{};
+    float** progress = new float*[numOfMessageRecord]{};
     int newMessageRate[usefulRound];
 
 
     MessageBox() {
         // messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
-        for (int i = 0; i < numOfMessagesTotal; i++) {
+        for (int i = 0; i < numOfMessageRecord; i++) {
             progress[i] = new float[messageRecordFrequency];
         }
     }
@@ -47,7 +47,10 @@ public:
 
         
         int res = messageId++;
-        startRound[res] = round;
+        if (res % messageRecordGap == 0) {
+            startRound[res / messageRecordGap] = round;
+        }
+        
         if (res > numOfMessagesTotal) {
             throw runtime_error("message box is full");
         }
@@ -67,12 +70,14 @@ public:
     }
 
     void addCount(int id, int round) {
-        int currMessageCount = ++messagesCount[id];
+        int currMessageCount = ++messagesCount[id];     
         if (currMessageCount == int((numOfNodes - numOfDeadNodes) * 0.95)) {
-            nintyfiveRound[id] = round;
             numOfMessagesWith95Count++;
+            if (id % messageRecordGap == 0) {
+                nintyfiveRound[id / messageRecordGap] = round;
+                
+            }
         }
-
         if (currMessageCount == numOfNodes - numOfDeadNodes) {
             // messagesWithFullCount.push(messageId);
             numOfMessageRemoved++;
@@ -81,12 +86,12 @@ public:
 
 
     void generateData(int round) {
-        for (int i = 0; i < messageId; i++) {
-            int roundDiff = round - startRound[i];
+        for (int i = 0; i < messageId / messageRecordGap && i < numOfMessageRecord; i++) {
+            int roundDiff = round - startRound[i * messageRecordGap];
             if (roundDiff >= messageRecordFrequency) {
                 continue;
             }
-            float percentage = float(messagesCount[i]) / float(numOfNodes - numOfDeadNodes);
+            float percentage = float(messagesCount[i * messageRecordGap]) / float(numOfNodes - numOfDeadNodes);
             progress[i][roundDiff] = percentage;
         }
     }
