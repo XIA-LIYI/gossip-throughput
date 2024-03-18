@@ -4,6 +4,7 @@
 #include "utils/barrier.cpp"
 #include "utils/helper.cpp"
 #include <thread>
+#include <random>
 using namespace std;
 
 Barrier sync(numOfThreads);
@@ -87,8 +88,20 @@ void calculateGossipLatency(MessageBox& messageBox) {
     int averageLatency = sumOfLatency / valid;
     cout << "valid: " << valid << " max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
 }
+random_device rd;
+mt19937 gen(rd());
+poisson_distribution<> d(2 * bandwidth);
+
+void givePermission(Node nodes[], int numOfNewMessageGenerated) {
+    set<int> nodesSelected;
+    for (int i = 0; i < numOfNewMessageGenerated; i++) {
+        int nodesSelected = gen() % numOfNodes;
+        nodes[nodesSelected].newMessagePermission++;
+    }
+}
 
 void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
+
     for (int i = 1; i <= totalRounds; i++) {
         // each small round
         for (int j = 0; j < int(bandwidth); j++) {
@@ -112,7 +125,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 }
                 nodes[curr].send(nodes, i, helper);
             }
-            sync.wait();     
+            sync.wait();
         }
         sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
@@ -120,9 +133,14 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
             nodes[j].refresh(nodes, helper, i);
         }
         sync.wait();
+        if ((threadId == 0) && (i < usefulRound)) {
+            int numOfNewMessageGenerated = d(gen);
+            givePermission(nodes, numOfNewMessageGenerated);
+
+        }
 
 
-        if (i % logFrequency == 0) {
+        if (i % logFrequency == 0 && i < usefulRound) {
 
             if (threadId == 0) {
                 cout << "Round " << i << " finishes." << endl;
@@ -132,13 +150,8 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
                 cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;                
-                if (messageBox.numOfNewMessage > newMessageLimit) {
-                    cout << "New message: " << newMessageLimit << endl;
-                } else {
-                    cout << "New message: " << messageBox.numOfNewMessage << endl;
-                }
-                
-                cout << nodes[0].messageBox->messagesCount[0] << endl;
+                cout << "New message: " << messageBox.numOfNewMessage << endl;
+                cout << nodes[0].messageBox->messagesCount[1] << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
@@ -152,7 +165,20 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
 
 }
 
-void printResult(MessageBox& messageBox) {
+void printInjectionRate(MessageBox& messageBox) {
+    int sumInjection = 0;
+    int maxInjection = 0;
+    int minInjection = 100;
+    for (int i = 0; i < usefulRound; i++) {
+        int curr = messageBox.newMessageRate[i];
+        sumInjection += curr;
+        maxInjection = max(maxInjection, curr);
+        minInjection = min(minInjection, curr);
+    }
+    cout << "New message rate max: " << maxInjection << " ave: " << int(sumInjection / usefulRound) << " min: " << minInjection << endl;
+}
+
+void printCompleteness(MessageBox& messageBox) {
     // Row is round. Each row contains min, max, ave;
     int requiredMessage = messageBox.messageId * 0.6;
     for (int round = 0; round < messageRecordFrequency; round++) {
@@ -211,5 +237,6 @@ int main() {
     cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
     cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
     calculateGossipLatency(messageBox);
-    printResult(messageBox);
+    printCompleteness(messageBox);
+    printInjectionRate(messageBox);
 }

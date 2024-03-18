@@ -1,3 +1,4 @@
+#pragma once
 #include<random>
 #include<set>
 #include<atomic>
@@ -24,18 +25,25 @@ public:
     queue<int> messagesToEnqueue;
 
     vector<queue<int>> messageQueues;
+    int newMessagePermission = 0;
     mt19937_64 gen;
     atomic<int> numOfMessagesReceived {};
     atomic<int> numOfMessagesSent {};
     int numOfMessagesValid = 0;
     int currMessagesValid = 0;
     mutex mtx;
+
+    queue<vector<int>> messagesInPrevRounds; 
     // int numOfMessagesRemoved = 0;
 
     // for attack
     bool isDead = false;
 
     MessageBox* messageBox;
+
+
+
+    atomic<int> totalMessagesInQueue = {};
 
     // random generator
     int t, b, current = 0;
@@ -58,13 +66,59 @@ public:
         }
     }
 
+    void check(string input) {
+        int total = 0;
+        for (int i = 0; i < numOfNodes; i++) {
+            total += messageQueues[i].size();
+        }
+        if (total != totalMessagesInQueue) {
+            cout << total << " " << totalMessagesInQueue << endl;
+            throw runtime_error(input);
+        }
+    }
+
 
     void refresh(Node nodes[], Helper &helper, int round) {
+        if (messagesInPrevRounds.size() > prevMessagesRounds) {
+            messagesInPrevRounds.pop();
+        }
+        vector<int> lastMessages;
+        if (newMessagePermission > 0) {
+            if (totalMessagesInQueue < 30 * numOfNodes) {
+                for (int i = 0; i < newMessagePermission; i++) {
+                    int newMessageId = messageBox->generateNewMessage(round);
+                    if (newMessageId >= 0) {
+                        numOfMessagesValid++;
+                        totalMessagesInQueue += gossipRate;
+                        messageBox->addCount(newMessageId, round);
+                        messageList.insert(newMessageId);
+                        lastMessages.push_back(newMessageId);
+
+                        set<int> nextReceivers;
+                        while (nextReceivers.size() < gossipRate) {
+                            int nextReceiver = gen() % numOfNodes;
+                            nextReceivers.insert(nextReceiver);
+                        }
+                        for (auto receiver: nextReceivers) {
+                            messageQueues[receiver].push(newMessageId);
+                        }
+                    } else {
+                        throw runtime_error("The node has permission but fails to get new message id");
+                    }
+                }
+
+            }
+            newMessagePermission = 0;
+        }
+        
+        
         while (!tempMessagesReceived.empty()) {
+            totalMessagesInQueue = totalMessagesInQueue + gossipRate;
             int messageReceived = tempMessagesReceived.pop();
             numOfMessagesValid++;
             currMessagesValid++;
             messageBox->addCount(messageReceived, round);
+            lastMessages.push_back(messageReceived);
 
             set<int> nextReceivers;
             while (nextReceivers.size() < gossipRate) {
@@ -72,9 +126,9 @@ public:
                 nextReceivers.insert(nextReceiver);
             }
             for (auto receiver: nextReceivers) {
-                if (nodes[receiver].find(messageReceived)) {
-                    continue;
-                }
+                // if (nodes[receiver].find(messageReceived)) {
+                //     continue;
+                // }
                 messageQueues[receiver].push(messageReceived);
             }
 
@@ -82,6 +136,7 @@ public:
                 throw runtime_error("message not in message list");
             }
         }
+        messagesInPrevRounds.push(lastMessages);
         tempMessagesReceived.clear();
 
         // b = helper.getB();
@@ -123,6 +178,7 @@ public:
             k++;
             auto messageId = messageQueues[receiver].front();
             messageQueues[receiver].pop();
+            totalMessagesInQueue--;
             if (messageBox->messagesCount[messageId] == (numOfNodes - numOfDeadNodes)) {
                 continue;
             } 
@@ -138,11 +194,38 @@ public:
             // }
             return;
         }
-        int newMessageId = messageBox->generateNewMessage(round);
-        if (newMessageId == -1) {
+        int preRounds = messagesInPrevRounds.size();
+        int curr = 0;
+        bool isSend = false;
+        while (curr < preRounds) {
+            curr++;
+            auto front = messagesInPrevRounds.front();
+            messagesInPrevRounds.pop();
+            messagesInPrevRounds.push(front);
+            if (isSend) {
+                continue;
+            }
+            for (auto prevMessage: front) {
+                bool result = nodes[receiver].receive(prevMessage);
+                if (!result) {
+                    continue;
+                } 
+                isSend = true;
+                break;              
+            }
+        }
+        if (isSend) {
             return;
         }
-        receive(newMessageId);
+
+        nodes[receiver].numOfMessagesReceived++;
+        // int newMessageId = messageBox->generateNewMessage(round);
+        // if (newMessageId == -1) {
+        //     nodes[receiver].numOfMessagesReceived++;
+        //     return;
+        // }
+        // nodes[receiver].numOfMessagesReceived++;
+        // receive(newMessageId);
     }
 
 

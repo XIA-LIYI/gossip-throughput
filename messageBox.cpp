@@ -4,6 +4,8 @@
 #include<list>
 #include "utils/threadsafelist.cpp"
 #include "parameters.cpp"
+#include<random>
+#include "./node.cpp"
 using namespace std;
 
 class MessageBox {
@@ -19,6 +21,8 @@ public:
     int startRound[numOfMessagesTotal] = {};
     int nintyfiveRound[numOfMessagesTotal] = {};
     float* progress[numOfMessagesTotal] = {};
+    int newMessageRate[usefulRound];
+
 
     MessageBox() {
         // messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
@@ -35,9 +39,13 @@ public:
             return -1;
         }
         int currNumOfNewMessage = ++numOfNewMessage;
-        if (currNumOfNewMessage > newMessageLimit) {
-            return -1;
-        }
+        // if (round < 100) {
+        //     if (currNumOfNewMessage > newMessageLimit) {
+        //         return -1;
+        //     }
+        // }
+
+        
         int res = messageId++;
         startRound[res] = round;
         if (res > numOfMessagesTotal) {
@@ -48,18 +56,20 @@ public:
     }
 
     void refresh(int round) {
+        if (round >= usefulRound) {
+            return;
+        }
+        newMessageRate[round] = numOfNewMessage;
         numOfNewMessage = 0;
         // messagesWithFullCount.clear();
-        if (round < usefulRound) {
-            generateData(round);
-        }
+        generateData(round);
         
     }
 
-    void addCount(int messageId, int round) {
-        int currMessageCount = ++messagesCount[messageId];
+    void addCount(int id, int round) {
+        int currMessageCount = ++messagesCount[id];
         if (currMessageCount == int((numOfNodes - numOfDeadNodes) * 0.95)) {
-            nintyfiveRound[messageId] = round;
+            nintyfiveRound[id] = round;
             numOfMessagesWith95Count++;
         }
 
