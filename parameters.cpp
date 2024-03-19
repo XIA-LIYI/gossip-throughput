@@ -1,8 +1,8 @@
 #pragma once
-const int bandwidth = 1667;
+const int bandwidth = 17;
 const int newMessageLimit = 34;
 const int gossipRate = 32;
-const int numOfNodes = 10000;
+const int numOfNodes = 100;
 const int numOfThreads = 4;
 const int totalRounds = 20000;
 const int usefulRound = 10000;

@@ -146,9 +146,6 @@ public:
         for (int i = 0; i < numOfNodes; i++) {
             targets[i] = false;
         }
-
-        removeMessageWithFullCount();
-
         numOfMessagesReceived = 0;
     }
 

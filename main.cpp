@@ -158,29 +158,31 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
             sync.wait();
         }
         sync.wait();
+        if ((threadId == 0) && (i < usefulRound)) {
+            int numOfNewMessageGenerated = d(gen);
+            givePermission(nodes, numOfNewMessageGenerated);
+        }
+        sync.wait();
         for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
             // refresh
             nodes[j].refresh(nodes, helper, i);
         }
         sync.wait();
-        if ((threadId == 0) && (i < usefulRound)) {
-            int numOfNewMessageGenerated = d(gen);
-            givePermission(nodes, numOfNewMessageGenerated);
-
+        for (int j = threadId + numOfDeadNodes; j < numOfNodes; j = j + numOfThreads) {
+            // refresh
+            nodes[j].removeMessageWithFullCount();
         }
-
+        sync.wait();
 
         if (i % logFrequency == 0 && i < usefulRound) {
 
             if (threadId == 0) {
                 cout << "Round " << i << " finishes." << endl;
-
-                cout << "Round " << i << endl;
                 cout << "number of total message is " << nodes[0].messageBox->messageId << endl;
                 cout << "number of messages that are received by all is " << nodes[0].messageBox->numOfMessageRemoved.load() << endl;
                 cout << "number of messages that are received by 95% of nodes is " << nodes[0].messageBox->numOfMessagesWith95Count.load() << endl;                
                 cout << "New message: " << messageBox.numOfNewMessage << endl;
-                // cout << nodes[0].messageBox->messagesCount[1] << endl;
+                cout << nodes[0].messageList.container.size() << endl;
                 calculateThroughput(nodes, i * bandwidth);
                 calculateInstantaneousThroughput(nodes, logFrequency * bandwidth);
                 cout << endl;
