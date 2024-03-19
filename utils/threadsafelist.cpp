@@ -18,7 +18,7 @@ public:
     }
 
     void set(int size, string type) {
-        lst = new int[size];
+        lst = new int[size]{};
         maxSize = size;
         usageType = type;
     }

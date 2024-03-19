@@ -6,7 +6,8 @@
 #include<list>
 #include "parameters.cpp"
 #include "utils/threadsafelist.cpp"
-#include "utils/messagelist.cpp"
+// #include "utils/messagelist.cpp"
+#include "utils/messageset.cpp"
 #include "utils/helper.cpp"
 #include "messageBox.cpp"
 #include<mutex>
@@ -16,7 +17,7 @@ using namespace std;
 class Node {
 public:
     int id;
-    MessageList messageList;
+    MessageSet messageList;
     // set<int> messageList;
 
     bool targets[numOfNodes] = {}; 
@@ -63,6 +64,16 @@ public:
         for (int i = 0; i < numOfNodes; i++) {
             queue<int> q;
             messageQueues.push_back(q);
+        }
+    }
+
+    void removeMessageWithFullCount() {
+        for (int i = 0; i < messageBox->messagesWithFullCount.size; i++) {
+            int message = messageBox->messagesWithFullCount.lst[i];
+            bool isRemoved = messageList.remove(message);
+            if (!isRemoved) {
+                throw runtime_error(to_string(message) + "No such message in message list");
+            }
         }
     }
 
@@ -136,6 +147,8 @@ public:
             targets[i] = false;
         }
 
+        removeMessageWithFullCount();
+
         numOfMessagesReceived = 0;
     }
 
@@ -176,11 +189,6 @@ public:
                 // duplicate
                 continue;
             }
-          
-            // if (isSend) {
-            //     messageQueues[receiver].push(messageId);
-            //     continue;
-            // }
             return;
         }
         int preRounds = messagesInPrevRounds.size();
@@ -195,6 +203,9 @@ public:
                 continue;
             }
             for (auto prevMessage: front) {
+                if (messageBox->messagesCount[prevMessage] == numOfNodes - numOfDeadNodes) {
+                    continue;
+                }
                 bool result = nodes[receiver].receive(prevMessage);
                 if (!result) {
                     continue;

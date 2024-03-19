@@ -20,6 +20,6 @@ const int numOfMessageRecord = 1667 * 1000;
 const int messageRecordGap = 10;
 const int messageRecordFrequency = 20;
 
-const int prevMessagesRounds = 3;
+const int prevMessagesRounds = 0;
 // for random
 int b, t;

@@ -14,7 +14,7 @@ public:
     atomic<int> messageId {};
     atomic<int>* messagesCount = new atomic<int>[numOfMessagesTotal]{};
     // list<int> messagesWithFullCount;
-    // ThreadSafeList messagesWithFullCount;
+    ThreadSafeList messagesWithFullCount;
     atomic<int> numOfMessageRemoved {};
     atomic<int> numOfMessagesWith95Count {};
 
@@ -25,7 +25,7 @@ public:
 
 
     MessageBox() {
-        // messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
+        messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
         for (int i = 0; i < numOfMessageRecord; i++) {
             progress[i] = new float[messageRecordFrequency] {};
         }
@@ -59,12 +59,12 @@ public:
     }
 
     void refresh(int round) {
+        messagesWithFullCount.clear();
         if (round >= usefulRound) {
             return;
         }
         newMessageRate[round] = numOfNewMessage;
         numOfNewMessage = 0;
-        // messagesWithFullCount.clear();
         generateData(round);
         
     }
@@ -75,12 +75,14 @@ public:
             numOfMessagesWith95Count++;
             if (id % messageRecordGap == 0) {
                 nintyfiveRound[id / messageRecordGap] = round;
-                
             }
         }
         if (currMessageCount == numOfNodes - numOfDeadNodes) {
-            // messagesWithFullCount.push(messageId);
+            messagesWithFullCount.push(id);
             numOfMessageRemoved++;
+        }
+        if (currMessageCount > numOfNodes - numOfDeadNodes) {
+            throw runtime_error("add count fails");
         }
     }
 

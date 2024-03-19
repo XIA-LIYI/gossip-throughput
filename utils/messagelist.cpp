@@ -20,18 +20,6 @@ public:
         lst = new bool[size] {};
     }
 
-    // bool insert(int messageId) {
-    //     lock_guard<mutex> lk(mtx);
-    //     if (messageId > maxSize) {
-    //         throw runtime_error("Out of capacity");
-    //     }
-    //     if (lst[messageId]) {
-    //         return false;
-    //     }
-    //     lst[messageId] = true;
-    //     return true;
-    // }
-
     void insert(int messageId) {
         lst[messageId] = true;
     }
