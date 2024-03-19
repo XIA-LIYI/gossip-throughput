@@ -78,6 +78,46 @@ void calculateGossipLatency(MessageBox& messageBox) {
     int averageLatency = sumOfLatency / valid;
     cout << "valid: " << valid << " max latency: " << maxLatency << " min latency: " << minLatency << " average latency: " << averageLatency << endl;
 }
+
+void printInjectionRate(MessageBox& messageBox) {
+    int sumInjection = 0;
+    int maxInjection = 0;
+    int minInjection = 100;
+    for (int i = 0; i < usefulRound; i++) {
+        int curr = messageBox.newMessageRate[i];
+        sumInjection += curr;
+        maxInjection = max(maxInjection, curr);
+        minInjection = min(minInjection, curr);
+    }
+    cout << "New message rate max: " << maxInjection << " ave: " << int(sumInjection / usefulRound) << " min: " << minInjection << endl;
+}
+
+void printCompleteness(MessageBox& messageBox) {
+    // Row is round. Each row contains min, max, ave;
+    int requiredMessage = messageBox.messageId * 0.6;
+    for (int round = 0; round < messageRecordFrequency; round++) {
+        float sum = 0.0;
+        int valid = 0;
+        for (int message = 0; message < numOfMessageRecord; message++) {
+            if (messageBox.progress[message][round] == 0.0) {
+                continue;
+            }
+            sum += messageBox.progress[message][round];
+            valid++;
+        }
+        float average = sum / float(valid);
+        float varianceSum = 0.0;
+        for (int message = 0; message < numOfMessageRecord; message++) {
+            if (messageBox.progress[message][round] == 0.0) {
+                continue;
+            }
+            varianceSum += pow(messageBox.progress[message][round] - average, 2.0);
+        }
+        float std = sqrt(varianceSum / valid);
+        cout << round << " " << average << " " << std << endl; 
+    }
+}
+
 random_device rd;
 mt19937 gen(rd());
 poisson_distribution<> d(2 * bandwidth);
@@ -154,41 +194,7 @@ void work(int threadId, Node nodes[], MessageBox& messageBox, Helper& helper) {
 
 }
 
-void printInjectionRate(MessageBox& messageBox) {
-    int sumInjection = 0;
-    int maxInjection = 0;
-    int minInjection = 100;
-    for (int i = 0; i < usefulRound; i++) {
-        int curr = messageBox.newMessageRate[i];
-        sumInjection += curr;
-        maxInjection = max(maxInjection, curr);
-        minInjection = min(minInjection, curr);
-    }
-    cout << "New message rate max: " << maxInjection << " ave: " << int(sumInjection / usefulRound) << " min: " << minInjection << endl;
-}
 
-void printCompleteness(MessageBox& messageBox) {
-    // Row is round. Each row contains min, max, ave;
-    int requiredMessage = messageBox.messageId * 0.6;
-    for (int round = 0; round < messageRecordFrequency; round++) {
-        float sum = 0.0;
-        int valid = 0;
-        for (int message = 0; message < requiredMessage; message++) {
-            if (messageBox.progress[message][round] == 0.0) {
-                continue;
-            }
-            sum += messageBox.progress[message][round];
-            valid++;
-        }
-        float average = sum / float(valid);
-        float varianceSum = 0.0;
-        for (int message = 0; message < requiredMessage; message++) {
-            varianceSum += pow(messageBox.progress[message][round] - average, 2.0);
-        }
-        float std = sqrt(varianceSum / requiredMessage);
-        cout << round << " " << average << " " << std << endl; 
-    }
-}
 
 int main() {
     Helper helper(numOfNodes);

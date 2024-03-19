@@ -27,7 +27,7 @@ public:
     MessageBox() {
         // messagesWithFullCount.set(bandwidth * 5, "MESSAGE_BOX");
         for (int i = 0; i < numOfMessageRecord; i++) {
-            progress[i] = new float[messageRecordFrequency];
+            progress[i] = new float[messageRecordFrequency] {};
         }
     }
 
@@ -87,7 +87,7 @@ public:
 
     void generateData(int round) {
         for (int i = 0; i < messageId / messageRecordGap && i < numOfMessageRecord; i++) {
-            int roundDiff = round - startRound[i * messageRecordGap];
+            int roundDiff = round - startRound[i];
             if (roundDiff >= messageRecordFrequency) {
                 continue;
             }

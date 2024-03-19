@@ -19,7 +19,7 @@ public:
     MessageList messageList;
     // set<int> messageList;
 
-    bool targets[numOfNodes] = {};
+    bool targets[numOfNodes] = {}; 
 
     ThreadSafeList tempMessagesReceived;
     queue<int> messagesToEnqueue;
@@ -63,17 +63,6 @@ public:
         for (int i = 0; i < numOfNodes; i++) {
             queue<int> q;
             messageQueues.push_back(q);
-        }
-    }
-
-    void check(string input) {
-        int total = 0;
-        for (int i = 0; i < numOfNodes; i++) {
-            total += messageQueues[i].size();
-        }
-        if (total != totalMessagesInQueue) {
-            cout << total << " " << totalMessagesInQueue << endl;
-            throw runtime_error(input);
         }
     }
 
